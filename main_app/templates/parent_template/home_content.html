@@ -1,0 +1,109 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <!-- Small boxes (Stat box) -->
+        <div class="row">
+            <!-- ./col -->
+            <div class="col-lg-5 col-6">
+                <!-- small box for notifications -->
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>Notifications</h3>
+                        <p>New Notifications</p>
+                    </div>
+                    <div class="icon">
+                      <i class="nav-icon fas fa-bell"></i>
+                    </div>
+                    <a href="{% url 'parent_view_notification' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            
+            <div class="col-lg-5 col-6">
+              <div class="small-box bg-info">
+                  <div class="inner">
+                      <h3>Parent Feedback</h3>
+
+                      <p>Send message to HOD</p>
+                  </div>
+                  <div class="icon">
+                    <i class="nav-icon fas fa-paper-plane"></i>
+                  </div>
+                  <a href="{% url 'parent_feedback' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+
+              </div>
+          </div>
+            <!-- ./col -->
+        </div>
+        <!-- /.row -->
+        <!-- Main row for graph -->
+        <div class="row">
+            <div class="col-md-12">
+                <!-- Attendance Graph -->
+                <div class="card card-info">
+                  <div class="card-header">
+                    <h3 class="card-title">Today's Attendance</h3>
+                    <div class="card-tools">
+                      <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                      <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="chart">
+                      <canvas id="attendanceGraph" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                    </div>
+                  </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.row (main row) -->
+    </div><!-- /.container-fluid -->
+</section>
+{% endblock content %}
+
+{% block custom_js %}
+<script>
+    $(document).ready(function() {
+        // Generate random attendance data
+        var totalClasses = 6; // Total classes (adjust as needed)
+        var attended = Math.floor(Math.random() * totalClasses); // Random attended classes
+        var missed = totalClasses - attended; // Calculate missed classes
+
+        var studentAttendanceData = {
+            labels: ['Attended', 'Missed'], // Categories for the bar graph
+            datasets: [
+              {
+                label: 'Attendance Summary',
+                data: [attended, missed], // Data for the bars
+                backgroundColor: ['#00a65a', '#f39c12'], // Bar colors
+                borderColor: ['#007b4a', '#d68c0e'], // Optional border colors
+                borderWidth: 1
+              }
+            ]
+        };
+
+        var barChartCanvas = $('#attendanceGraph').get(0).getContext('2d');
+        var barOptions = {
+          maintainAspectRatio: false,
+          responsive: true,
+          scales: {
+              y: {
+                  beginAtZero: true, // Y-axis starts at 0
+              }
+          }
+        };
+
+        var barChart = new Chart(barChartCanvas, {
+          type: 'bar', // Change to 'bar' for a bar graph
+          data: studentAttendanceData,
+          options: barOptions,
+        });
+
+        // Log values for debugging
+        console.log("Attended: " + attended + ", Missed: " + missed);
+    });
+</script>
+{% endblock custom_js %}
+

@@ -1,0 +1,124 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{ page_title }}{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ page_title }}</h3>
+                        <button class="btn btn-warning float-right" data-toggle="modal" data-target="#myModal" id="sendToAllParents">
+                            Send to All
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <table id="parentTable" class="table table-bordered table-hover">
+                            <thead class="table-info">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Gender</th>
+                                    <th>Avatar</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for parent in parents %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ parent.last_name }}, {{ parent.first_name }}</td>
+                                    <td>{{ parent.email }}</td>
+                                    <td>{{ parent.gender }}</td>
+                                    <td>
+                                        {% if parent.profile_pic %}
+                                            <img src="{{ parent.profile_pic }}" height="56" width="56" class="img-fluid mb-2" />
+                                        {% else %}
+                                            No Image
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button data-toggle="modal" data-target="#myModal" class="btn btn-primary show_notification" value="{{ parent.id }}">
+                                            Send Notification
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal for sending notification -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Send Notification</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" id="message" class="form-control" placeholder="Enter your message here">
+                    <input type="hidden" id="parent_id" class="form-control">
+                    <input type="hidden" id="send_all" value="false">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" id="sendNotification" class="btn btn-success">Send Notification</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block custom_js %}
+<script>
+    const parentIds = [{% for parent in parents %}{{ parent.id }}, {% endfor %}];
+
+    $(".show_notification").click(function() {
+        $("#parent_id").val($(this).val());
+        $("#send_all").val("false");
+    });
+
+    $("#sendToAllParents").click(function() {
+        $("#send_all").val("true");
+        $("#parent_id").val("");
+    });
+
+    $("#sendNotification").click(function() {
+        const parentId = $("#parent_id").val();
+        const message = $("#message").val();
+        const sendAll = $("#send_all").val() === "true";
+
+        if (sendAll) {
+            parentIds.forEach(id => sendNotification(id, message));
+        } else {
+            sendNotification(parentId, message);
+        }
+    });
+
+    function sendNotification(id, message) {
+        $.ajax({
+            url: "{% url 'send_parent_notification' %}",
+            type: "POST",
+            data: { id: id, message: message },
+            success: function(response) {
+                alert("Notification sent successfully!");
+                location.reload();
+            },
+            error: function() {
+                alert("Error sending notification.");
+            }
+        });
+    }
+</script>
+{% endblock custom_js %}
