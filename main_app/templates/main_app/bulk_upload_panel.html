@@ -1,0 +1,31 @@
+<div class="card camp-form-card mb-0">
+    <div class="card-header camp-card-header">
+        <div class="camp-card-header-copy">
+            <h3 class="card-title">{{ upload_title }}</h3>
+            {% if upload_hint %}
+            <p>{{ upload_hint }}</p>
+            {% endif %}
+        </div>
+        <a href="{{ sample_file_url }}" class="camp-header-action" download>
+            <i class="fas fa-download"></i>
+            <span>{{ sample_file_name }}</span>
+        </a>
+    </div>
+    <div class="card-body">
+        {% if upload_note %}
+        <div class="alert alert-light border mb-3">
+            <i class="fas fa-info-circle mr-2"></i>{{ upload_note }}
+        </div>
+        {% endif %}
+        <form method="post" enctype="multipart/form-data" action="{% url upload_url_name %}" class="mb-0">
+            {% csrf_token %}
+            <div class="form-group mb-3">
+                <label for="xlsx_file">Upload XLSX File</label>
+                <input type="file" name="xlsx_file" id="xlsx_file" accept=".xlsx" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-success btn-block">
+                <i class="fas fa-file-import mr-2"></i>Import Records
+            </button>
+        </form>
+    </div>
+</div>

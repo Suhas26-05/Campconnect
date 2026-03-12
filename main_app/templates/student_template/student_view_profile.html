@@ -1,39 +1,30 @@
 {% extends 'main_app/base.html' %}
-{% load static %}
-{% block page_title %}{{page_title}}{% endblock page_title %}
+{% block page_title %}{{ page_title }}{% endblock page_title %}
 
 {% block content %}
-
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <!-- general form elements -->
-                <div class="card card-info">
-                    <div class="card-header">
-                        <h3 class="card-title">{{page_title}}</h3>
-                    </div>
-
-                    {% include "main_app/form_template.html" with messages=messages  form=form button_text="Update Profile"%}
-                </div>
-                <!-- /.card -->
-
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Profile Workspace</h3>
+                <p class="text-muted mb-0 mt-1">Use the Info image in the top bar anytime to reopen this page and update your details.</p>
             </div>
+            {% include "main_app/form_template.html" with form=form button_text="Save Profile Changes" %}
         </div>
     </div>
-</section>
+</div>
 {% endblock content %}
 
 {% block custom_js %}
-  <script>
-      $(document).ready(function(){
-            var ifNotfied = false;
-          $("#id_password").on("change", function(){
-              if (!ifNotfied){
-                ifNotfied = true;
-                alert("After a successful profile update:\n\nYour session would be terminated\nYou would be required to login again")
-              }
-          })
-      })
-  </script>
+<script>
+    $(document).ready(function(){
+        let ifNotified = false;
+        $("#id_password").on("change", function(){
+            if (!ifNotified){
+                ifNotified = true;
+                alert("After a successful profile update:\n\nYour session will be terminated.\nYou will need to log in again.");
+            }
+        });
+    });
+</script>
 {% endblock custom_js %}

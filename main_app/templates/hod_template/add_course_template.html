@@ -3,23 +3,12 @@
 {% block page_title %}{{page_title}}{% endblock page_title %}
 
 {% block content %}
-
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <!-- general form elements -->
-                <div class="card card-info">
-                    <div class="card-header">
-                        <h3 class="card-title">{{page_title}}</h3>
-                    </div>
-
-                    {% include "main_app/form_template.html" with messages=messages  form=form button_text="Add Course"%}
-                </div>
-                <!-- /.card -->
-
-            </div>
+<div class="card camp-form-card">
+    <div class="card-header camp-card-header">
+        <div class="camp-card-header-copy">
+            <h3 class="card-title">{{ page_title }}</h3>
         </div>
     </div>
-</section>
+    {% include "main_app/form_template.html" with messages=messages form=form button_text="Add Course" %}
+</div>
 {% endblock content %}

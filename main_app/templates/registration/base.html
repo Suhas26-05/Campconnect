@@ -1,49 +1,58 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>C.M.S | Log In</title>
-    <!-- Tell the browser to be responsive to screen width -->
+    <title>CampConnect | Account Access</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
-    <!-- Ionicons -->
-    <link rel="stylesheet" href="{% static 'https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css' %}">
-    <!-- icheck bootstrap -->
     <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
-    <!-- Theme style -->
     <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
-    <!-- Google Font: Source Sans Pro -->
-    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body.login-page {
+            font-family: "Plus Jakarta Sans", sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(237, 174, 73, 0.18), transparent 24%),
+                radial-gradient(circle at top right, rgba(31, 111, 87, 0.18), transparent 24%),
+                linear-gradient(180deg, #eff5ea 0%, #f7faf5 100%);
+        }
+
+        .login-box {
+            width: min(100%, 420px);
+        }
+
+        .login-logo a {
+            color: #162114;
+            font-weight: 800;
+        }
+
+        .card {
+            border: 0;
+            border-radius: 24px;
+            box-shadow: 0 24px 60px rgba(30, 54, 42, 0.12);
+            overflow: hidden;
+        }
+    </style>
 </head>
 
 <body class="hold-transition login-page">
     <div class="login-box">
         <div class="login-logo">
-            <a href=""><b>C.M.S</b></a>
-
+            <a href="{% url 'login_page' %}"><b>CampConnect</b></a>
         </div>
-        <!-- /.login-logo -->
         <div class="card">
-           
           {% block content %}
-            
           {% endblock content %}
         </div>
     </div>
-    <!-- /.login-box -->
-
-    <!-- jQuery -->
     <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
-    <!-- Bootstrap 4 -->
     <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-    <!-- AdminLTE App -->
     <script src="{% static 'dist/js/adminlte.min.js' %}"></script>
-
 </body>
 
 </html>

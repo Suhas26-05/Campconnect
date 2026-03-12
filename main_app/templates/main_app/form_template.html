@@ -1,31 +1,27 @@
-<form role="form" method="POST" enctype="multipart/form-data">
+<form role="form" method="POST" enctype="multipart/form-data" class="camp-form-shell">
     {% csrf_token %}
     <div class="card-body">
-
-
-        {% for field in form  %}
-        <div class="form-group">
-            {{field.errors}}
-            {{field.label_tag}}
-            {{field}}
-
+        <div class="row">
+            {% for field in form %}
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                    <div class="text-danger small mt-2">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-
-
-
-
     </div>
-    <!-- /.card-body -->
 
-    <div class="card-footer">
-        <button type="submit" class="btn btn-success btn-block">
-            {% if button_text %}
-            {{button_text}}
-            {% else %}
-            Submit
-            {% endif %}
-
+    <div class="card-footer bg-transparent border-0 pt-0">
+        <button type="submit" class="btn btn-success btn-block btn-lg">
+            {% if button_text %}{{ button_text }}{% else %}Submit{% endif %}
         </button>
     </div>
 </form>

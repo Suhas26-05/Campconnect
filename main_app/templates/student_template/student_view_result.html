@@ -1,43 +1,47 @@
 {% extends 'main_app/base.html' %}
-{% load static %}
-{% block page_title %}{{page_title}}{% endblock page_title %}
+{% block page_title %}{{ page_title }}{% endblock page_title %}
 
 {% block content %}
-
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <!-- general form elements -->
-       
-                <!-- /.card -->
-<div class="card card-dark">
-    <div class="card-header"><h3 class="card-title">{{page_title}}</h3>
-    </div>
-   <div class="table p-2">
-
-       <table class="table table-bordered">
-           <tr>
-               <th>ID</th>
-               <th>Subject</th>
-               <th>Test</th>
-               <th>Exam</th>
-               <th>Total</th>
-        </tr>
-        {% for result in results %}
-        <tr>
-            <td>{{forloop.counter}}</td>
-            <td>{{ result.subject }}</td>
-            <td>{{ result.test }}</td>
-            <td>{{ result.exam }}</td>
-            <td>{{ result.test|add:result.exam }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
-    </div>
-            </div>
+<div class="card camp-table-card">
+    <div class="card-header camp-card-header">
+        <div class="camp-card-header-copy">
+            <h3 class="card-title">{{ page_title }}</h3>
+            <p>Unit tests and mid-term assessments submitted by staff appear here.</p>
         </div>
     </div>
-</section>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Assessment Type</th>
+                        <th>Assessment Name</th>
+                        <th>Subject</th>
+                        <th>Internal</th>
+                        <th>External</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ result.get_result_type_display }}</td>
+                        <td>{{ result.assessment_name }}</td>
+                        <td>{{ result.subject.name }}</td>
+                        <td>{{ result.test }}</td>
+                        <td>{{ result.exam }}</td>
+                        <td>{{ result.test|add:result.exam }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7">No unit or mid-term results available yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock content %}

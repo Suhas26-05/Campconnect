@@ -1,153 +1,606 @@
 {% extends 'main_app/base.html' %}
 {% load static %}
-{% block page_title %}{{page_title}}{% endblock page_title %}
+{% block page_title %}{{ page_title }}{% endblock page_title %}
+
+{% block custom_css %}
+<style>
+    .attendance-shell {
+        display: grid;
+        grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    .attendance-panel,
+    .attendance-roster-card {
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: var(--camp-shadow);
+        overflow: hidden;
+    }
+
+    .attendance-panel .card-body,
+    .attendance-roster-card .card-body {
+        padding: 1.4rem;
+    }
+
+    .attendance-mode-bar {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+        flex-wrap: wrap;
+    }
+
+    .attendance-mode-card {
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: var(--camp-shadow);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .attendance-mode-card .card-body {
+        padding: 1.1rem 1.4rem;
+    }
+
+    .attendance-mode-btn {
+        border: 0;
+        border-radius: 14px;
+        padding: 0.8rem 1rem;
+        font-weight: 700;
+        background: rgba(22, 33, 20, 0.08);
+        color: var(--camp-ink);
+    }
+
+    .attendance-mode-btn.is-active {
+        background: linear-gradient(135deg, var(--camp-primary), #36916e);
+        color: #fff;
+    }
+
+    .attendance-meta {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .attendance-note {
+        padding: 0.95rem 1rem;
+        border-radius: 18px;
+        background: rgba(31, 111, 87, 0.08);
+        color: var(--camp-primary-deep);
+        font-size: 0.92rem;
+        line-height: 1.5;
+    }
+
+    .attendance-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .attendance-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.55rem 0.8rem;
+        border-radius: 999px;
+        background: rgba(22, 33, 20, 0.06);
+        color: var(--camp-primary-deep);
+        font-weight: 700;
+        font-size: 0.84rem;
+    }
+
+    .attendance-roster {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0.9rem;
+    }
+
+    .attendance-student {
+        position: relative;
+        border: 1px solid var(--camp-line);
+        border-radius: 20px;
+        background: rgba(243, 246, 239, 0.9);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .attendance-student:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 32px rgba(18, 35, 27, 0.08);
+        border-color: rgba(31, 111, 87, 0.18);
+    }
+
+    .attendance-student input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .attendance-student label {
+        display: block;
+        margin: 0;
+        padding: 1rem 1rem 1rem 3.9rem;
+        min-height: 100%;
+        cursor: pointer;
+    }
+
+    .attendance-student label::before {
+        content: "";
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        width: 22px;
+        height: 22px;
+        border-radius: 8px;
+        border: 1.5px solid rgba(31, 111, 87, 0.32);
+        background: #fff;
+    }
+
+    .attendance-student label::after {
+        content: "\f00c";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        position: absolute;
+        top: 1.02rem;
+        left: 1.28rem;
+        color: #fff;
+        font-size: 0.78rem;
+        opacity: 0;
+        transform: scale(0.7);
+        transition: opacity 0.16s ease, transform 0.16s ease;
+    }
+
+    .attendance-student input:checked + label {
+        background: linear-gradient(135deg, rgba(31, 111, 87, 0.12), rgba(54, 145, 110, 0.1));
+        border-radius: 20px;
+    }
+
+    .attendance-student input:checked + label::before {
+        background: linear-gradient(135deg, var(--camp-primary), #36916e);
+        border-color: transparent;
+    }
+
+    .attendance-student input:checked + label::after {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .attendance-student-name {
+        font-weight: 700;
+        color: var(--camp-ink);
+        line-height: 1.45;
+        display: block;
+    }
+
+    .attendance-student-state {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 0.55rem;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        background: rgba(31, 111, 87, 0.11);
+        color: var(--camp-primary-deep);
+        font-size: 0.76rem;
+        font-weight: 700;
+    }
+
+    .attendance-student input:not(:checked) + label .attendance-student-state {
+        background: rgba(163, 59, 32, 0.11);
+        color: var(--camp-danger);
+    }
+
+    .attendance-empty {
+        padding: 2.75rem 1.25rem;
+        text-align: center;
+        color: var(--camp-muted);
+        border: 1px dashed rgba(22, 33, 20, 0.16);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.55);
+    }
+
+    .attendance-actions {
+        display: flex;
+        gap: 0.9rem;
+        flex-wrap: wrap;
+        margin-top: 1.25rem;
+    }
+
+    .attendance-actions .btn {
+        min-width: 180px;
+    }
+
+    .attendance-field {
+        display: none;
+        margin-bottom: 1rem;
+    }
+
+    .attendance-field.is-visible {
+        display: block;
+    }
+
+    .attendance-counter {
+        margin-left: auto;
+    }
+
+    @media (max-width: 991.98px) {
+        .attendance-shell {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock custom_css %}
+
 {% block content %}
+<div class="attendance-mode-card card">
+    <div class="card-body">
+        <div class="attendance-mode-bar mb-0">
+            <button type="button" class="attendance-mode-btn" data-mode="take">Take Attendance</button>
+            <button type="button" class="attendance-mode-btn" data-mode="update">Update Attendance</button>
+        </div>
+    </div>
+</div>
 
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <!-- general form elements -->
-                <div class="card card-info">
-                    <div class="card-header">
-                        <h3 class="card-title">{{page_title}}</h3>
-                    </div>
-
-                    <!-- /.card-header -->
-                    <!-- form start -->
-                    <div class="card-body">
-
-
-
-                        <div class="form-group">
-                            <label>Subject</label>
-                            <select name="subject" class="form-control" id='subject'>
-                                <option value="">----</option>
-                                {% for subject in subjects  %}
-                                <option value="{{subject.id}}">{{subject.name}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-
-                        <div class="form-group">
-                            <label>Session Year</label>
-                            <select name="session" id='session' class="form-control">
-                                <option value="">----</option>
-                                {% for session in sessions  %}
-                                <option value="{{session.id}}">{{session}} </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        {% comment %}
-
-                        <div>
-                            <label>Attendance Date</label>
-                            <input type="date" class='form-control' name="attendance_date" id='attendance_date' id="">
-                        </div>
-                        {% endcomment %}
-
-                    </div>
-                    <!-- /.card-body -->
-
-                    <div class="card-footer">
-                        <button type="button" id='fetch_student' class="btn btn-success btn-block">Fetch Students</button>
-                        <div class="form-group" id="student_data">
-
-                        </div>
-                    </div>
+<div class="attendance-shell">
+    <div class="attendance-panel card">
+        <div class="card-header camp-card-header">
+            <div class="camp-card-header-copy">
+                <h3 class="card-title">{{ page_title }}</h3>
+                <p>Use one workspace for new attendance and attendance corrections.</p>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="attendance-meta">
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <select name="subject" class="form-control" id="subject">
+                        <option value="">Select subject</option>
+                        {% for subject in subjects %}
+                        <option value="{{ subject.id }}">{{ subject.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-                <!-- /.card -->
 
+                <div class="form-group">
+                    <label for="session">Class Section</label>
+                    <select name="session" id="session" class="form-control">
+                        <option value="">Select section</option>
+                        {% for session in sessions %}
+                        <option value="{{ session.id }}">{{ session }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group attendance-field" id="attendance_date_select_wrap">
+                    <label for="attendance_date_select">Attendance Date</label>
+                    <select name="attendance_date_select" id="attendance_date_select" class="form-control"></select>
+                </div>
+
+                <div class="attendance-note" id="attendance_note">
+                    Suspended students are automatically excluded. Parents receive the final attendance update after you save.
+                </div>
+
+                <button type="button" id="attendance_primary_btn" class="btn btn-success btn-block">
+                    Load Attendance Roster
+                </button>
             </div>
         </div>
     </div>
-</section>
-{% endblock content %}
 
+    <div class="attendance-roster-card card">
+        <div class="card-header camp-card-header">
+            <div class="camp-card-header-copy">
+                <h3 class="card-title">Attendance Workspace</h3>
+                <p id="attendance_roster_copy">Students for the selected subject and section will appear here.</p>
+            </div>
+            <div class="attendance-counter camp-badge" id="attendance_counter">0 students</div>
+        </div>
+        <div class="card-body">
+            <div class="attendance-summary" id="attendance_summary" style="display:none;">
+                <span class="attendance-chip" id="selected_subject_chip">
+                    <i class="fas fa-book-open"></i>
+                    <span>Subject</span>
+                </span>
+                <span class="attendance-chip" id="selected_session_chip">
+                    <i class="fas fa-users"></i>
+                    <span>Section</span>
+                </span>
+                <span class="attendance-chip" id="selected_date_chip" style="display:none;">
+                    <i class="fas fa-calendar-day"></i>
+                    <span>Date</span>
+                </span>
+            </div>
+
+            <div id="student_data">
+                <div class="attendance-empty">
+                    Choose a mode, subject, and section to begin.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
 
 {% block custom_js %}
 <script>
     $(document).ready(function () {
+        var currentMode = "{{ attendance_mode|default:'take' }}";
 
-       
-        $("#fetch_student").click(function () {
-            var subject = $("#subject").val()
-            var session = $("#session").val()
-            $("#student_data").html(null)
-if (subject.length  == 0 || session.length == 0){
-    alert("Please select session and subject");
-    return false;
-}
+        function renderEmptyState(message) {
+            $("#attendance_summary").hide();
+            $("#selected_date_chip").hide();
+            $("#attendance_counter").text("0 students");
+            $("#student_data").html("<div class='attendance-empty'>" + message + "</div>");
+        }
+
+        function updateStudentStates() {
+            $(".attendance-student").each(function () {
+                var checkbox = $(this).find("input[name='student_data[]']");
+                $(this).find(".attendance-student-state span").text(checkbox.is(":checked") ? "Present" : "Absent");
+            });
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            $(".attendance-mode-btn").removeClass("is-active");
+            $('.attendance-mode-btn[data-mode="' + mode + '"]').addClass("is-active");
+            $("#attendance_date_select_wrap").toggleClass("is-visible", mode === "update");
+            $("#attendance_primary_btn").text(mode === "take" ? "Load Attendance Roster" : "Fetch Attendance Dates");
+            $("#attendance_note").text(
+                mode === "take"
+                    ? "Suspended students are automatically excluded. Parents receive the final attendance update after you save."
+                    : "Choose an existing attendance date, then update the roster. Parent notifications are sent after each update save."
+            );
+            $("#attendance_roster_copy").text(
+                mode === "take"
+                    ? "Students for the selected subject and section will appear here."
+                    : "Existing attendance records for the selected subject and section will appear here."
+            );
+            renderEmptyState(
+                mode === "take"
+                    ? "Choose a subject and section, then load the roster."
+                    : "Choose a subject and section, then fetch existing attendance dates."
+            );
+            $("#attendance_date_select").html("");
+        }
+
+        function setSummary(subjectText, sessionText, dateText) {
+            $("#attendance_summary").show();
+            $("#selected_subject_chip span:last").text(subjectText);
+            $("#selected_session_chip span:last").text(sessionText);
+            if (dateText) {
+                $("#selected_date_chip").show();
+                $("#selected_date_chip span:last").text(dateText);
+            } else {
+                $("#selected_date_chip").hide();
+            }
+        }
+
+        function buildRoster(students, options) {
+            if (!students.length) {
+                renderEmptyState(options.emptyMessage);
+                return;
+            }
+
+            setSummary(options.subjectText, options.sessionText, options.dateText);
+            $("#attendance_counter").text(students.length + " students");
+
+            var html = "";
+            if (currentMode === "take") {
+                html += "<div class='attendance-field is-visible'>";
+                html += "<label for='attendance_date_input'>Attendance Date</label>";
+                html += "<input type='date' class='form-control' id='attendance_date_input'>";
+                html += "</div>";
+            }
+
+            html += "<div class='attendance-roster'>";
+            for (var i = 0; i < students.length; i++) {
+                var item = students[i];
+                var isChecked = (currentMode === "take") ? true : !!item.status;
+                html += "<div class='attendance-student'>";
+                html += "<input type='checkbox' " + (isChecked ? "checked='checked'" : "") + " name='student_data[]' value='" + item.id + "' id='checkbox" + item.id + "'>";
+                html += "<label for='checkbox" + item.id + "'>";
+                html += "<span class='attendance-student-name'>" + item.name + "</span>";
+                html += "<span class='attendance-student-state'><i class='fas fa-check-circle'></i><span>" + (isChecked ? "Present" : "Absent") + "</span></span>";
+                html += "</label>";
+                html += "</div>";
+            }
+            html += "</div>";
+            html += "<div class='attendance-actions'>";
+            html += "<button id='mark_all_present' class='btn btn-secondary' type='button'>Mark All Present</button>";
+            html += "<button id='save_attendance' class='btn btn-success' type='button'>" + (currentMode === "take" ? "Save Attendance" : "Update Attendance") + "</button>";
+            html += "</div>";
+
+            $("#student_data").html(html);
+            updateStudentStates();
+        }
+
+        function loadStudentsForTake() {
+            var subject = $("#subject").val();
+            var session = $("#session").val();
+            var subjectText = $("#subject option:selected").text();
+            var sessionText = $("#session option:selected").text();
+
             $.ajax({
                 url: "{% url 'get_students' %}",
-                type: 'POST',
-                data: {
-                    subject: subject,
-                    session: session
-                }
+                type: "POST",
+                data: { subject: subject, session: session }
             }).done(function (response) {
-                var json_data = JSON.parse(response)
-                if (json_data.length < 1) {
-                    alert("No data to display")
-                } else {
-                    var div_data = "<hr/><div class='form-group'></div><div class='form-group'> <label>Attendance Date</label><input type='date' class='form-control' name='attendance_date' id='attendance_date' ><div class='row'>"
+                var data = (typeof response === "string") ? JSON.parse(response) : response;
+                buildRoster(data, {
+                    subjectText: subjectText,
+                    sessionText: sessionText,
+                    dateText: "",
+                    emptyMessage: "No active students are available for this subject and section."
+                });
+            }).fail(function () {
+                renderEmptyState("There was an error while fetching students. Please try again.");
+            }).always(function () {
+                $("#attendance_primary_btn").prop("disabled", false).text("Load Attendance Roster");
+            });
+        }
 
-                    for (key in json_data) {
-                        div_data += "<div class='col-lg-3'><div class='form-check custom-control custom-checkbox'><input type='checkbox' class='custom-control-input' checked='checked' name='student_data[]' value=" + json_data[key]['id'] + " id='checkbox" + json_data[key]['id'] + "' /> <label for='checkbox" + json_data[key]['id'] + "' class='custom-control-label'>" + json_data[key]['name'] + "</label></div> </div>"
-                    }
-                    div_data += "</div></div>"
-                    div_data += "<div class='form-group'><button id='save_attendance' class='btn btn-success' type='button'>Save Attendance</button></div>"
-                    $("#student_data").html(div_data)
+        function loadAttendanceDates() {
+            var subject = $("#subject").val();
+            var session = $("#session").val();
+
+            $.ajax({
+                url: "{% url 'get_attendance' %}",
+                type: "POST",
+                data: { subject: subject, session: session }
+            }).done(function (response) {
+                var data = (typeof response === "string") ? JSON.parse(response) : response;
+                $("#attendance_primary_btn").prop("disabled", false).text("Fetch Attendance Dates");
+
+                if (!data.length) {
+                    $("#attendance_date_select").html("");
+                    renderEmptyState("No saved attendance dates were found for this subject and section.");
+                    return;
                 }
-            }).fail(function (response) {
-                alert("Error in fetching students")
-            })
 
-
-            $(document).on('click', '#save_attendance', function () {
-                $(this).attr("disabled","disabled")
-                $(this).text("Saving Attendance Data...")
-                var student_data = $("input[name='student_data[]']").map(function () {
-                    if ($(this).is(":checked")){
-                    return {'id':$(this).val(), 'status': 1};
-    
-                    }
-                    return {'id':$(this).val(), 'status': 0};
-    
-                }).get()
-                var attendance_date = $('#attendance_date').val()
-                if (attendance_date.length < 10){
-                    alert("Select date")
-                    return false;
+                var options = "";
+                for (var i = 0; i < data.length; i++) {
+                    options += "<option value='" + data[i].id + "'>" + data[i].attendance_date + "</option>";
                 }
-                student_data = JSON.stringify(student_data)
+                $("#attendance_date_select").html(options);
+                $("#attendance_date_select_wrap").addClass("is-visible");
+                fetchAttendanceRoster();
+            }).fail(function () {
+                $("#attendance_primary_btn").prop("disabled", false).text("Fetch Attendance Dates");
+                renderEmptyState("There was an error while fetching attendance dates. Please try again.");
+            });
+        }
+
+        function fetchAttendanceRoster() {
+            var attendanceId = $("#attendance_date_select").val();
+            var subjectText = $("#subject option:selected").text();
+            var sessionText = $("#session option:selected").text();
+            var dateText = $("#attendance_date_select option:selected").text();
+
+            if (!attendanceId) {
+                renderEmptyState("Choose an attendance date to update the roster.");
+                return;
+            }
+
+            $.ajax({
+                url: "{% url 'get_student_attendance' %}",
+                type: "POST",
+                data: { attendance_date_id: attendanceId }
+            }).done(function (response) {
+                var data = (typeof response === "string") ? JSON.parse(response) : response;
+                buildRoster(data, {
+                    subjectText: subjectText,
+                    sessionText: sessionText,
+                    dateText: dateText,
+                    emptyMessage: "No student attendance data is available for this date."
+                });
+            }).fail(function () {
+                renderEmptyState("There was an error while fetching attendance data. Please try again.");
+            });
+        }
+
+        $(".attendance-mode-btn").on("click", function () {
+            setMode($(this).data("mode"));
+        });
+
+        $("#attendance_primary_btn").on("click", function () {
+            var subject = $("#subject").val();
+            var session = $("#session").val();
+            if (!subject || !session) {
+                alert("Please select both subject and class section.");
+                return;
+            }
+
+            $(this).prop("disabled", true).text(currentMode === "take" ? "Loading Roster..." : "Fetching Attendance Dates...");
+            if (currentMode === "take") {
+                loadStudentsForTake();
+            } else {
+                loadAttendanceDates();
+            }
+        });
+
+        $("#attendance_date_select").on("change", function () {
+            if (currentMode === "update") {
+                fetchAttendanceRoster();
+            }
+        });
+
+        $(document).on("change", "input[name='student_data[]']", function () {
+            updateStudentStates();
+        });
+
+        $(document).on("click", "#mark_all_present", function () {
+            $("input[name='student_data[]']").prop("checked", true);
+            updateStudentStates();
+        });
+
+        $(document).on("click", "#save_attendance", function () {
+            var studentData = $("input[name='student_data[]']").map(function () {
+                return {
+                    id: $(this).val(),
+                    status: $(this).is(":checked") ? 1 : 0
+                };
+            }).get();
+
+            if (currentMode === "take") {
+                var attendanceDate = $("#attendance_date_input").val();
+                if (!attendanceDate) {
+                    alert("Please select the attendance date.");
+                    return;
+                }
+
+                $(this).prop("disabled", true).text("Saving Attendance...");
                 $.ajax({
                     url: "{% url 'save_attendance' %}",
-                    type: 'POST',
+                    type: "POST",
                     data: {
-                        date: attendance_date,
-                        student_ids: student_data,
-                        subject: subject,
-                        session: session
-            
+                        date: attendanceDate,
+                        student_ids: JSON.stringify(studentData),
+                        subject: $("#subject").val(),
+                        session: $("#session").val()
                     }
                 }).done(function (response) {
-                    if (response == 'OK'){
-                        alert("Saved")
-                    }else{
-                        alert("Error. Please try again")
+                    if (response === "OK") {
+                        alert("Attendance saved successfully.");
+                        location.reload();
+                    } else {
+                        alert("Attendance could not be saved. Please try again.");
                     }
-                    location.reload()
-                    
-                }).fail(function (response) {
-                    alert("Error in saving attendance")
-                })
-    
-            })
+                }).fail(function () {
+                    alert("Error in saving attendance.");
+                    $("#save_attendance").prop("disabled", false).text("Save Attendance");
+                });
+                return;
+            }
 
+            var attendanceId = $("#attendance_date_select").val();
+            if (!attendanceId) {
+                alert("Please choose an attendance date.");
+                return;
+            }
 
-        })
-    })
+            $(this).prop("disabled", true).text("Updating Attendance...");
+            $.ajax({
+                url: "{% url 'update_attendance' %}",
+                type: "POST",
+                data: {
+                    date: attendanceId,
+                    student_ids: JSON.stringify(studentData)
+                }
+            }).done(function (response) {
+                if (response === "OK") {
+                    alert("Attendance updated successfully.");
+                    location.reload();
+                } else {
+                    alert("Attendance could not be updated. Please try again.");
+                }
+            }).fail(function () {
+                alert("Error in updating attendance.");
+                $("#save_attendance").prop("disabled", false).text("Update Attendance");
+            });
+        });
+
+        setMode(currentMode === "update" ? "update" : "take");
+    });
 </script>
 {% endblock custom_js %}

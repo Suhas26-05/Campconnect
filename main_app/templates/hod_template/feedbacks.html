@@ -1,0 +1,177 @@
+{% extends 'main_app/base.html' %}
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block custom_css %}
+<style>
+    .category-bar { display:flex; gap:0.75rem; flex-wrap:wrap; }
+    .category-btn { border:0; border-radius:14px; padding:0.8rem 1rem; font-weight:700; background:rgba(22,33,20,0.08); color:var(--camp-ink); }
+    .category-btn.is-active { background:linear-gradient(135deg, var(--camp-primary), #36916e); color:#fff; }
+    .category-panel { display:none; }
+    .category-panel.is-visible { display:block; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card camp-table-card">
+    <div class="card-header camp-card-header">
+        <div class="camp-card-header-copy">
+            <h3 class="card-title">{{ page_title }}</h3>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="category-bar mb-4">
+            <button type="button" class="category-btn is-active" data-filter="students">Students</button>
+            <button type="button" class="category-btn" data-filter="staff">Staff</button>
+            <button type="button" class="category-btn" data-filter="parents">Parents</button>
+        </div>
+
+        <div class="category-panel is-visible" data-panel="students">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-info">
+                        <tr><th>#</th><th>Student</th><th>Section</th><th>Message</th><th>Sent On</th><th>Replied On</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for feedback in student_feedbacks %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ feedback.student }}</td>
+                            <td>{{ feedback.student.session }}</td>
+                            <td>{{ feedback.feedback }}</td>
+                            <td>{{ feedback.created_at }}</td>
+                            {% if feedback.reply == "" %}
+                            <td><span class='badge badge-warning'>Pending Response</span></td>
+                            <td><button data-toggle="modal" data-target="#reply_modal" data-url="{% url 'student_feedback_message' %}" value="{{ feedback.id }}" class="btn btn-success reply_open_modal">Reply</button></td>
+                            {% else %}
+                            <td>{{ feedback.updated_at }}</td>
+                            <td>{{ feedback.reply }}</td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="7">No student feedback found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="category-panel" data-panel="staff">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-info">
+                        <tr><th>#</th><th>Staff</th><th>Course</th><th>Message</th><th>Sent On</th><th>Replied On</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for feedback in staff_feedbacks %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ feedback.staff }}</td>
+                            <td>{{ feedback.staff.course }}</td>
+                            <td>{{ feedback.feedback }}</td>
+                            <td>{{ feedback.created_at }}</td>
+                            {% if feedback.reply == "" %}
+                            <td><span class='badge badge-warning'>Pending Response</span></td>
+                            <td><button data-toggle="modal" data-target="#reply_modal" data-url="{% url 'staff_feedback_message' %}" value="{{ feedback.id }}" class="btn btn-success reply_open_modal">Reply</button></td>
+                            {% else %}
+                            <td>{{ feedback.updated_at }}</td>
+                            <td>{{ feedback.reply }}</td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="7">No staff feedback found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="category-panel" data-panel="parents">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-info">
+                        <tr><th>#</th><th>Parent</th><th>Message</th><th>Sent On</th><th>Replied On</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for feedback in parent_feedbacks %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ feedback.parent.admin.first_name }} {{ feedback.parent.admin.last_name }}</td>
+                            <td>{{ feedback.feedback }}</td>
+                            <td>{{ feedback.created_at }}</td>
+                            {% if feedback.reply == "" %}
+                            <td><span class='badge badge-warning'>Pending Response</span></td>
+                            <td><button data-toggle="modal" data-target="#reply_modal" data-url="{% url 'parent_feedback_message' %}" value="{{ feedback.id }}" class="btn btn-success reply_open_modal">Reply</button></td>
+                            {% else %}
+                            <td>{{ feedback.updated_at }}</td>
+                            <td>{{ feedback.reply }}</td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6">No parent feedback found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="reply_modal" tabindex="-1" role="dialog" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Reply to Feedback</h4>
+         </div>
+         <div class="modal-body">
+             <input type="hidden" id="reply_id">
+             <input type="hidden" id="reply_url">
+             <p>Reply to <span id="reply_name"></span></p>
+             <textarea id="reply_message" cols="30" rows="10" class="form-control"></textarea>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            <button id="reply_btn" class="btn btn-success btn-block">Reply</button>
+         </div>
+      </div>
+   </div>
+</div>
+{% endblock %}
+
+{% block custom_js %}
+<script>
+    function setCategory(filter) {
+        $(".category-btn").removeClass("is-active");
+        $('.category-btn[data-filter="' + filter + '"]').addClass("is-active");
+        $(".category-panel").removeClass("is-visible");
+        $('.category-panel[data-panel="' + filter + '"]').addClass("is-visible");
+    }
+
+    $(".category-btn").on("click", function () {
+        setCategory($(this).data("filter"));
+    });
+
+    $(".reply_open_modal").click(function(){
+        $("#reply_id").val($(this).val());
+        $("#reply_url").val($(this).data("url"));
+        $("#reply_name").text($(this).parents("tr").children("td:eq(1)").text());
+        $("#reply_message").val("");
+    });
+
+    $("#reply_btn").on("click", function(){
+        $.ajax({
+            url: $("#reply_url").val(),
+            type:'POST',
+            data:{ id: $("#reply_id").val(), reply: $("#reply_message").val() }
+        }).done(function(response){
+            if (response == "True" || response == true){
+                location.reload();
+            } else {
+                alert("Reply could not be sent.");
+            }
+        }).fail(function(){
+            alert("Error occurred.");
+        });
+    });
+</script>
+{% endblock %}

@@ -1,54 +1,97 @@
 {% extends 'main_app/base.html' %}
-{% load static %}
-{% block page_title %}{{page_title}}{% endblock page_title %}
+{% block page_title %}{{ page_title }}{% endblock %}
+
 {% block content %}
-
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <!-- general form elements -->
-                <div class="card card-info">
-                    <div class="card-header">
-                        <h3 class="card-title">{{page_title}}</h3>
-                    </div>
-
-
-                    <!-- /.card-header -->
-                    <!-- form start -->
-                    <div class="card-body">
-
-
-
-                       
-
-
-                        <div class="form-group table">
-              <table class="table table-bordered">
-                  <tr>
-                      <th>#</th>
-                      <th>Date</th>
-                      <th>Message</th>
-                  </tr>
-                  {% for notification in  notifications %}
-                    <tr>
-                        <td>{{forloop.counter}}</td>
-                        <td>{{notification.created_at}}</td>
-                        <td>{{notification.message}}</td>
-                    </tr>
-                  {% endfor %}
-              </table>
-                        </div>
-                   
-                    </div>
-    
+<div class="row">
+    <div class="col-12">
+        <div class="card camp-table-card">
+            <div class="card-header camp-card-header">
+                <div class="camp-card-header-copy">
+                    <h3 class="card-title">Substitute Leave Requests</h3>
+                    <p>Review leave-cover requests assigned to you. Accepted requests move to HOD review.</p>
                 </div>
-                <!-- /.card -->
-
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-info">
+                            <tr>
+                                <th>#</th>
+                                <th>Requested By</th>
+                                <th>Course</th>
+                                <th>Leave Date</th>
+                                <th>Reason</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for leave in substitute_leave_requests %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ leave.staff.admin.last_name }}, {{ leave.staff.admin.first_name }}</td>
+                                <td>{{ leave.staff.course }}</td>
+                                <td>{{ leave.date }}</td>
+                                <td>{{ leave.message }}</td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <form method="post" action="{% url 'staff_respond_leave_substitution' leave.id 'accept' %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-success">Accept</button>
+                                        </form>
+                                        <form method="post" action="{% url 'staff_respond_leave_substitution' leave.id 'reject' %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger">Reject</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6">No substitute leave requests are waiting for your response.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</section>
-{% endblock content %}
 
-
+    <div class="col-12">
+        <div class="card camp-table-card">
+            <div class="card-header camp-card-header">
+                <div class="camp-card-header-copy">
+                    <h3 class="card-title">{{ page_title }}</h3>
+                    <p>Your latest staff notifications, including leave workflow updates.</p>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-info">
+                            <tr>
+                                <th>#</th>
+                                <th>Date</th>
+                                <th>Message</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for notification in notifications %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ notification.created_at }}</td>
+                                <td>{{ notification.message }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3">No notifications found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

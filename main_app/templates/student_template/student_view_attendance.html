@@ -1,140 +1,315 @@
 {% extends 'main_app/base.html' %}
 {% load static %}
-{% block page_title %}{{page_title}}{% endblock page_title %}
+{% block page_title %}{{ page_title }}{% endblock page_title %}
+
 {% block custom_css %}
 <style>
-.attendance_div_red{
-    padding: 10px;
-    background: #f44336;
-    border: 3px solid white;
-    text-align: center;
-    color: #fff;
-    border-radius: 30px;
-    box-shadow: 1px 1px 1px grey;
-    margin: 5px;
-}
-.attendance_div_green{
-    padding: 10px;
-    background: #4CAF50;
-    border: 3px solid white;
-    text-align: center;
-    color: #fff;
-    border-radius: 30px;
-    box-shadow: 1px 1px 1px grey;
-    margin: 5px;
-}
+    .student-attendance-shell {
+        display: grid;
+        grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    .student-attendance-filter,
+    .student-attendance-results {
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: var(--camp-shadow);
+        overflow: hidden;
+    }
+
+    .student-attendance-filter .card-body,
+    .student-attendance-results .card-body {
+        padding: 1.4rem;
+    }
+
+    .student-attendance-note {
+        padding: 0.95rem 1rem;
+        border-radius: 18px;
+        background: rgba(31, 111, 87, 0.08);
+        color: var(--camp-primary-deep);
+        font-size: 0.92rem;
+        line-height: 1.55;
+        margin-bottom: 1rem;
+    }
+
+    .student-attendance-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .student-attendance-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.55rem 0.8rem;
+        border-radius: 999px;
+        background: rgba(22, 33, 20, 0.06);
+        color: var(--camp-primary-deep);
+        font-weight: 700;
+        font-size: 0.84rem;
+    }
+
+    .student-attendance-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0.9rem;
+    }
+
+    .student-attendance-item {
+        border-radius: 20px;
+        padding: 1rem;
+        border: 1px solid rgba(22, 33, 20, 0.08);
+        background: rgba(255, 255, 255, 0.72);
+    }
+
+    .student-attendance-item.is-present {
+        background: linear-gradient(135deg, rgba(31, 111, 87, 0.14), rgba(54, 145, 110, 0.09));
+        border-color: rgba(31, 111, 87, 0.18);
+    }
+
+    .student-attendance-item.is-absent {
+        background: linear-gradient(135deg, rgba(163, 59, 32, 0.12), rgba(211, 107, 67, 0.08));
+        border-color: rgba(163, 59, 32, 0.16);
+    }
+
+    .student-attendance-date {
+        font-weight: 700;
+        color: var(--camp-ink);
+        display: block;
+        margin-bottom: 0.55rem;
+    }
+
+    .student-attendance-state {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.38rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+    }
+
+    .student-attendance-item.is-present .student-attendance-state {
+        background: rgba(31, 111, 87, 0.12);
+        color: var(--camp-primary-deep);
+    }
+
+    .student-attendance-item.is-absent .student-attendance-state {
+        background: rgba(163, 59, 32, 0.12);
+        color: var(--camp-danger);
+    }
+
+    .student-attendance-empty {
+        padding: 2.8rem 1.25rem;
+        text-align: center;
+        color: var(--camp-muted);
+        border: 1px dashed rgba(22, 33, 20, 0.16);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.55);
+    }
+
+    .student-attendance-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .student-attendance-stat {
+        border-radius: 20px;
+        padding: 1rem;
+        background: rgba(22, 33, 20, 0.05);
+    }
+
+    .student-attendance-stat strong {
+        display: block;
+        font-size: 1.5rem;
+        font-family: "Space Grotesk", sans-serif;
+        color: var(--camp-ink);
+    }
+
+    .student-attendance-stat span {
+        color: var(--camp-muted);
+        font-size: 0.84rem;
+    }
+
+    @media (max-width: 991.98px) {
+        .student-attendance-shell {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .student-attendance-stats {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 {% endblock custom_css %}
 
 {% block content %}
+<div class="student-attendance-shell">
+    <div class="student-attendance-filter card">
+        <div class="card-header camp-card-header">
+            <div class="camp-card-header-copy">
+                <h3 class="card-title">{{ page_title }}</h3>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="student-attendance-note">
+                Pick one subject and a date range. The result panel will show your attendance breakdown for the selected period.
+            </div>
 
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <!-- general form elements -->
-                <div class="card card-info">
-                    <div class="card-header">
-                        <h3 class="card-title">{{page_title}}</h3>
-                    </div>
-                    <!-- /.card-header -->
-                    <!-- form start -->
-                    <div class="card-body">
+            <div class="form-group">
+                <label for="subject">Subject</label>
+                <select id="subject" class="form-control">
+                    <option value="">Select subject</option>
+                    {% for subject in subjects %}
+                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
+            <div class="form-group">
+                <label for="start_date">Start Date</label>
+                <input type="date" class="form-control" name="start_date" id="start_date">
+            </div>
 
+            <div class="form-group">
+                <label for="end_date">End Date</label>
+                <input type="date" class="form-control" name="end_date" id="end_date">
+            </div>
 
-                        <div class="form-group">
-                            <label>Select Subject</label>
-                            <select  id="subject" class="form-control">
-                                <option value="">----</option>
-                                {% for subject in subjects  %}
-                                <option value="{{subject.id}}">{{subject.name}} </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <label>Start Date</label>
-                                    <input type="date" class="form-control" placeholder="Start Date" name="start_date" required id="start_date">
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <label>End Date</label>
-                                    <input type="date" class="form-control" placeholder="End Date" name="end_date"  id="end_date">
-                                </div>
-                            </div>
-                            <button type="button" id="fetch_attendance" class="btn btn-success btn-block">Fetch Attendance Data</button>
-               </div>
+            <button type="button" id="fetch_attendance" class="btn btn-success btn-block">
+                View Attendance Range
+            </button>
+        </div>
+    </div>
 
-                    </div>
-                    <!-- /.card-body -->
+    <div class="student-attendance-results card">
+        <div class="card-header camp-card-header">
+            <div class="camp-card-header-copy">
+                <h3 class="card-title">Attendance Timeline</h3>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="student-attendance-summary" id="attendance_summary" style="display:none;">
+                <span class="student-attendance-chip" id="attendance_subject_chip">
+                    <i class="fas fa-book-open"></i>
+                    <span>Subject</span>
+                </span>
+                <span class="student-attendance-chip" id="attendance_range_chip">
+                    <i class="fas fa-calendar-range"></i>
+                    <span>Date Range</span>
+                </span>
+            </div>
 
-                    <div class="card-footer">
-                            
-                        <div class="row" id="attendance_data"></div>
-                    </div>
+            <div class="student-attendance-stats" id="attendance_stats" style="display:none;">
+                <div class="student-attendance-stat">
+                    <strong id="attendance_total_count">0</strong>
+                    <span>Total Classes</span>
                 </div>
-                <!-- /.card -->
+                <div class="student-attendance-stat">
+                    <strong id="attendance_present_count">0</strong>
+                    <span>Present</span>
+                </div>
+                <div class="student-attendance-stat">
+                    <strong id="attendance_absent_count">0</strong>
+                    <span>Absent</span>
+                </div>
+            </div>
 
+            <div id="attendance_data">
+                <div class="student-attendance-empty">
+                    Select a subject and date range, then click <strong>View Attendance Range</strong>.
+                </div>
             </div>
         </div>
     </div>
-</section>
+</div>
 {% endblock content %}
-
 
 {% block custom_js %}
 <script>
     $(document).ready(function () {
+        function renderEmpty(message) {
+            $("#attendance_summary").hide();
+            $("#attendance_stats").hide();
+            $("#attendance_data").html("<div class='student-attendance-empty'>" + message + "</div>");
+        }
 
-       
         $("#fetch_attendance").click(function () {
-            var subject = $("#subject").val()
-            var start_date = $("#start_date").val()
-            var end_date = $("#end_date").val()
-            if (subject.length  == 0 || end_date.length ==0 ||start_date.length == 0){
-                alert("Please Select Subject and Date Range");
+            var subject = $("#subject").val();
+            var subjectText = $("#subject option:selected").text();
+            var start_date = $("#start_date").val();
+            var end_date = $("#end_date").val();
+
+            if (!subject || !start_date || !end_date) {
+                alert("Please select subject and date range.");
                 return false;
             }
-            $("#attendance_data").html(null)
+
+            $("#fetch_attendance").prop("disabled", true).text("Loading Attendance...");
+            $("#attendance_data").html("<div class='student-attendance-empty'>Fetching attendance records...</div>");
+
             $.ajax({
                 url: "{% url 'student_view_attendance' %}",
-                type: 'POST',
+                type: "POST",
                 data: {
                     subject: subject,
                     start_date: start_date,
-                    end_date:end_date
+                    end_date: end_date
                 }
             }).done(function (response) {
-                var json_data = JSON.parse(response)
+                var json_data = (typeof response === "string") ? JSON.parse(response) : response;
+                var presentCount = 0;
+                var absentCount = 0;
+                var html = "<div class='student-attendance-grid'>";
+
+                $("#fetch_attendance").prop("disabled", false).text("View Attendance Range");
+
                 if (json_data.length < 1) {
-                    $("#attendance_data").html("<div class='col-md-12 alert alert-danger'>No Data For Specified Parameters</div>")
+                    renderEmpty("No attendance records were found for the selected subject and date range.");
+                    return;
+                }
 
-                } else {
-                    var div_data = ""
-                         
-                    for (key in json_data) {
-                    if (json_data[key]['status']){
-                        div_data += "<div class='col-lg-3 attendance_div_green'><b>"+ json_data[key]['date'] + "</b><br/>Present</div>" 
-                    }else{
-
-                        div_data += "<div class='col-lg-3 attendance_div_red'><b>"+ json_data[key]['date'] + "</b><br/>Absent</div>"
+                for (key in json_data) {
+                    var isPresent = json_data[key]["status"];
+                    if (isPresent) {
+                        presentCount += 1;
+                    } else {
+                        absentCount += 1;
                     }
+
+                    html += "<div class='student-attendance-item " + (isPresent ? "is-present" : "is-absent") + "'>";
+                    html += "<span class='student-attendance-date'>" + json_data[key]["date"] + "</span>";
+                    html += "<span class='student-attendance-state'>";
+                    html += isPresent
+                        ? "<i class='fas fa-check-circle'></i><span>Present</span>"
+                        : "<i class='fas fa-circle-xmark'></i><span>Absent</span>";
+                    html += "</span>";
+                    html += "</div>";
                 }
-                    div_data += ""
-                    $("#attendance_data").html(div_data)
 
-                }
-            }).fail(function (response) {
-                $("#attendance_data").html("Error While Fetching Records")
-            })
+                html += "</div>";
+                $("#attendance_data").html(html);
 
-
-          
-
-        })
-    })
+                $("#attendance_summary").show();
+                $("#attendance_stats").show();
+                $("#attendance_subject_chip span:last").text(subjectText);
+                $("#attendance_range_chip span:last").text(start_date + " to " + end_date);
+                $("#attendance_total_count").text(json_data.length);
+                $("#attendance_present_count").text(presentCount);
+                $("#attendance_absent_count").text(absentCount);
+            }).fail(function () {
+                $("#fetch_attendance").prop("disabled", false).text("View Attendance Range");
+                renderEmpty("There was an error while fetching records. Please try again.");
+            });
+        });
+    });
 </script>
 {% endblock custom_js %}

@@ -1,0 +1,160 @@
+{% extends 'main_app/base.html' %}
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block custom_css %}
+<style>
+    .category-bar { display:flex; gap:0.75rem; flex-wrap:wrap; }
+    .category-btn { border:0; border-radius:14px; padding:0.8rem 1rem; font-weight:700; background:rgba(22,33,20,0.08); color:var(--camp-ink); }
+    .category-btn.is-active { background:linear-gradient(135deg, var(--camp-primary), #36916e); color:#fff; }
+    .category-panel { display:none; }
+    .category-panel.is-visible { display:block; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card camp-table-card">
+    <div class="card-header camp-card-header">
+        <div class="camp-card-header-copy">
+            <h3 class="card-title">{{ page_title }}</h3>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="category-bar mb-4">
+            <button type="button" class="category-btn is-active" data-filter="staff">Staff</button>
+            <button type="button" class="category-btn" data-filter="students">Students</button>
+        </div>
+
+        <div class="category-panel is-visible" data-panel="staff">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-info">
+                        <tr><th>#</th><th>Staff</th><th>Course</th><th>Leave Date</th><th>Substitute Teacher</th><th>Substitute Status</th><th>Reason</th><th>Submitted On</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for leave in staff_leaves %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ leave.staff }}</td>
+                            <td>{{ leave.staff.course }}</td>
+                            <td>{{ leave.date }}</td>
+                            <td>{% if leave.substitute_staff %}{{ leave.substitute_staff.admin.last_name }}, {{ leave.substitute_staff.admin.first_name }}{% else %}Not selected{% endif %}</td>
+                            <td><span class="badge badge-success">Accepted</span></td>
+                            <td>{{ leave.message }}</td>
+                            <td>{{ leave.created_at }}</td>
+                            {% if leave.status == 0 %}
+                            <td><button data-toggle="modal" data-target="#leave_modal" data-url="{% url 'view_staff_leave' %}" value="{{ leave.id }}" class="btn btn-success leave_open_modal">Review</button></td>
+                            {% elif leave.status == -1 %}
+                            <td><span class='badge badge-danger'>Rejected</span></td>
+                            {% else %}
+                            <td><span class='badge badge-success'>Approved</span></td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="9">No staff leave requests are ready for HOD review.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="category-panel" data-panel="students">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-info">
+                        <tr><th>#</th><th>Student</th><th>Course</th><th>Reason</th><th>Leave Date</th><th>Submitted On</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for leave in student_leaves %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ leave.student }}</td>
+                            <td>{{ leave.student.course }}</td>
+                            <td>{{ leave.message }}</td>
+                            <td>{{ leave.date }}</td>
+                            <td>{{ leave.created_at }}</td>
+                            {% if leave.status == 0 %}
+                            <td><button data-toggle="modal" data-target="#leave_modal" data-url="{% url 'view_student_leave' %}" value="{{ leave.id }}" class="btn btn-success leave_open_modal">Review</button></td>
+                            {% elif leave.status == -1 %}
+                            <td><span class='badge badge-danger'>Rejected</span></td>
+                            {% else %}
+                            <td><span class='badge badge-success'>Approved</span></td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="7">No student leave requests found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="leave_modal" tabindex="-1" role="dialog" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Review Leave Request</h4>
+         </div>
+         <div class="modal-body">
+             <input type="hidden" id="leave_id">
+             <input type="hidden" id="leave_url">
+             <p>Reply to <span id="leave_reply_name"></span>'s leave request</p>
+             <select id="reply_leave_status" class="form-control">
+                <option value="">-- Select --</option>
+                <option value="1">Approve</option>
+                <option value="-1">Reject</option>
+             </select>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            <button id="leave_reply_btn" class="btn btn-success btn-block">Submit</button>
+         </div>
+      </div>
+   </div>
+</div>
+{% endblock %}
+
+{% block custom_js %}
+<script>
+    function setLeaveCategory(filter) {
+        $(".category-btn").removeClass("is-active");
+        $('.category-btn[data-filter="' + filter + '"]').addClass("is-active");
+        $(".category-panel").removeClass("is-visible");
+        $('.category-panel[data-panel="' + filter + '"]').addClass("is-visible");
+    }
+
+    $(".category-btn").on("click", function () {
+        setLeaveCategory($(this).data("filter"));
+    });
+
+    $(".leave_open_modal").click(function(){
+        $("#leave_id").val($(this).val());
+        $("#leave_url").val($(this).data("url"));
+        $("#leave_reply_name").text($(this).parents("tr").children("td:eq(1)").text());
+        $("#reply_leave_status").val("");
+    });
+
+    $("#leave_reply_btn").on("click", function(){
+        var status = $("#reply_leave_status").val();
+        if (status !== '1' && status !== '-1') {
+            alert("Choose valid response");
+            return;
+        }
+        $.ajax({
+            url: $("#leave_url").val(),
+            type:'POST',
+            data:{ id: $("#leave_id").val(), status: status }
+        }).done(function(response){
+            if (response == "True" || response == true){
+                location.reload();
+            } else {
+                alert("Leave response could not be saved.");
+            }
+        }).fail(function(){
+            alert("Error occurred.");
+        });
+    });
+</script>
+{% endblock %}

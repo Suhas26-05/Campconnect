@@ -1,0 +1,57 @@
+{% extends 'main_app/base.html' %}
+{% block page_title %}{{ page_title }}{% endblock page_title %}
+
+{% block content %}
+<div class="card camp-table-card">
+    <div class="card-header camp-card-header">
+        <div class="camp-card-header-copy">
+            <h3 class="card-title">{{ page_title }}</h3>
+            <p>Semester results published by HOD appear on this separate page.</p>
+        </div>
+    </div>
+    <div class="card-body">
+        {% for semester_group in semester_groups %}
+        <div class="{% if not forloop.last %}mb-4{% endif %}">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="h5 mb-0">{{ semester_group.semester_name }}</h4>
+                <span class="text-muted">{{ semester_group.results|length }} subjects</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Subject</th>
+                            <th>Internal</th>
+                            <th>External</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in semester_group.results %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ result.subject.name }}</td>
+                            <td>{{ result.test }}</td>
+                            <td>{{ result.exam }}</td>
+                            <td>{{ result.test|add:result.exam }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% empty %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover mb-0">
+                <tbody>
+                    <tr>
+                        <td>No semester results published yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock content %}

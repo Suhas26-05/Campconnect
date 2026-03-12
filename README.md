@@ -1,209 +1,277 @@
-# CampConnect 🎓
+# CampConnect
 
-  **CampConnect** is a full-fledged **College Management System** developed using Django. It’s designed to digitalize and centralize all key administrative and academic processes of an educational institution — offering distinct portals for HODs, Staff, Students, and Parents. This platform ensures transparency, improves academic efficiency, and enhances communication between all stakeholders.
+CampConnect is a Django-based campus management system for four user roles:
 
+- `HOD`
+- `Staff`
+- `Student`
+- `Parent`
 
-### 🎯 Key Objectives
+It manages user administration, attendance, results, leave workflows, feedback, and notifications in a single role-based application.
 
-- 🏫 **Digitize college operations** like attendance, announcements, material sharing, and performance reporting.
-- 👥 **Provide role-based interfaces** for different users (HOD, Staff, Student, Parent).
-- 📊 **Ensure real-time tracking and visibility** of academic progress and student activities.
-- 🔗 **Enhance connectivity** between college departments, faculty, students, and parents.
+## Current Scope
 
----
+CampConnect currently supports:
 
-## 🧰 What Does It Manage?
+- HOD creation and management of staff, students, parents, courses, subjects, and sections
+- single and bulk XLSX import for staff, students, parents, and semester results
+- staff attendance marking and attendance updates
+- student attendance viewing
+- HOD semester result publishing
+- staff unit and mid-term result submission
+- parent linkage to students through `roll_number`
+- notifications for staff, students, and parents
+- dashboard summaries for each user type
+- staff and student leave applications
+- staff leave requests with substitute teacher selection
+- HOD approval or rejection of staff and student leave requests
+- student suspension by HOD
 
-CampConnect covers a wide range of college-level activities:
+## Role Summary
 
-### 🧑‍🏫 Academic Management
-- Course approvals by HOD
-- Uploading and categorizing study materials
-- Assignment distribution and submissions
-- Performance monitoring
+### HOD
 
-### 📅 Attendance Management
-- Staff can mark daily attendance
-- Students can view their attendance history
-- Parents receive attendance alerts and summaries
+- manage staff, students, parents, courses, subjects, and sections
+- create users individually or from XLSX
+- suspend or reactivate students
+- review attendance
+- approve or reject leave requests
+- send notifications to staff, students, and parents
+- publish semester results manually in bulk or from XLSX
 
-### 🧾 Result & Progress Tracking
-- Students can track academic performance
-- Parents get simplified result summaries
-- HOD and staff can analyze student trends
+### Staff
 
-### 📢 Communication & Announcements
-- Global and course-specific announcements
-- Notice board for circulars and updates
-- Parent-teacher communication channel
+- mark and update attendance
+- submit unit and mid-term results
+- send notifications to students
+- apply for leave with a substitute teacher
+- view notifications and leave history
 
-### 🧑‍💼 Staff & Department Management
-- HOD can add/manage staff profiles
-- Course allocations to staff
-- Department-wise access and control
+### Student
 
----
+- view attendance
+- view unit/mid results
+- view semester results grouped by semester name
+- apply for leave
+- submit feedback
+- view notifications
 
-## 👥 Role-Based Access
+### Parent
 
-| Role       | Capabilities                                                       |
-|------------|--------------------------------------------------------------------|
-| **HOD**    | Manage departments, approve staff uploads, monitor academics       |
-| **Staff**  | Upload materials, post announcements, mark attendance              |
-| **Student**| Access notes, view attendance, submit assignments                  |
-| **Parent** | Monitor student progress, receive updates                          |
+- view linked student summary
+- receive attendance, result, and notification updates
+- view notifications
+- submit feedback
 
----
+## Academic Structure
 
-## 🛠️ Technologies Used
+CampConnect uses this model:
 
-- **Backend**: Django 4.2 (Python)
-- **Frontend**: HTML, CSS, JavaScript, Bootstrap
-- **Database**: SQLite (can scale to PostgreSQL)
-- **Authentication**: Django’s User & Group system
-- **AI Integration** *(optional/experimental)*: Google GenAI (for smart material suggestions, automated feedback, etc.)
+- `Course`: degree course such as `CSE`, `EEE`, `ECE`
+- `Subject`: subject under a course such as `AI`, `ML`, `DBMS`
+- `Section`: class grouping such as `A`, `B`, `21CSE-A`
 
----
+In code, the section model is still named `Session`, but the UI uses `Section`.
 
+## Tech Stack
 
-## 📌 Project Structure
+- Python
+- Django
+- SQLite by default
+- HTML templates
+- Bootstrap/AdminLTE-based assets
+- jQuery
+- Chart.js
+- OpenPyXL for XLSX import/export samples
+- WhiteNoise for static file serving
 
+## Project Structure
+
+```text
+Campconnect/
+|-- college_management_system/   Django settings, root URLs, WSGI/ASGI
+|-- main_app/                    Models, views, forms, templates, migrations
+|-- media/                       Uploaded media and sample XLSX files
+|   `-- samples/                 Bulk import sample files
+|-- db.sqlite3                   Default SQLite database
+|-- manage.py                    Django management entry point
+|-- requirements.txt             Python dependencies
+|-- README.md
+`-- PROJECT_DEEP_ANALYSIS.txt
 ```
-campconnect/
-│
-├── college_management_system/ # Project configuration and settings
-├── main_app/ # Core app logic (views, models, templates)
-├── media/ # Uploaded files and media content
-├── db.sqlite3 # Default SQLite database
-├── manage.py # Django CLI management tool
-└── requirements.txt # Python dependencies
 
+## Main URLs
+
+- `/` login page
+- `/admin/home/` HOD dashboard
+- `/staff/home/` staff dashboard
+- `/student/home/` student dashboard
+- `/parent/home/` parent dashboard
+
+## Bulk Upload Formats
+
+Sample files are stored in [`media/samples`](./media/samples).
+
+### Staff
+
+File: `staff_sample.xlsx`
+
+Columns:
+
+```text
+first_name, last_name, address, email, gender, password, course_name
 ```
 
----
+### Students
 
+File: `students_sample.xlsx`
 
+Columns:
 
-## 🚀 How to Run This Project
+```text
+first_name, last_name, address, email, gender, password, roll_number, course_name, section_id(optional or section name)
+```
 
-### 1. **Export / Fork the Repository**
+### Parents
 
-You can either download the code as ZIP or fork it to your GitHub:
+File: `parents_sample.xlsx`
 
-- To download:
-  - Click the green **Code** button → **Download ZIP**
-- To fork:
-  - Click the **Fork** button at the top-right of the repository
+Columns:
 
----
+```text
+first_name, last_name, address, email, gender, password, student_roll_number
+```
 
-### 2. **Clone the Repository**
+Note: import students first, then parents using matching `student_roll_number`.
 
-  - git clone https://github.com/YourUsername/CampConnect.git
-  - cd CampConnect
+### Semester Results
 
----
+File: `semester_results_sample.xlsx`
 
-### 3. Create and Activate Virtual Environment (Optional but Recommended)
+Columns:
 
-  - python -m venv venv
-  - source venv/bin/activate      # Linux/macOS
-  - venv\Scripts\activate         # Windows
+```text
+roll_number, subject_name, section_name, semester_name, internal_score, external_score
+```
 
----
+## Results Model
 
-### 4. Install Requirements
+CampConnect currently supports three result types:
 
-  - pip install -r requirements.txt
+- `Unit Test`
+- `Mid Term`
+- `Semester Result`
 
----
+Behavior:
 
-### 5. Run Migrations
-  - python manage.py makemigrations
-  - python manage.py migrate
+- staff submit `Unit Test` and `Mid Term` results
+- HOD publishes `Semester Result`
+- semester results are shown on a separate student page and grouped by semester name
 
----
+## Notifications
 
-### 6. Create Superuser (for HOD/Admin Access)
+Notifications exist for:
 
-  - python manage.py createsuperuser
+- staff
+- students
+- parents
 
----
+Dashboard behavior:
 
-### 7. Run the Development Server
+- recent notifications appear on the dashboard
+- `Clear` removes them from the dashboard card only
+- `View All` still keeps the full notification history
 
-  - python manage.py runserver
-  - Visit http://127.0.0.1:8000/ in your browser to use the system.
+## Setup
 
----
+### 1. Create a virtual environment
 
+Windows:
 
+```powershell
+python -m venv venv
+venv\Scripts\activate
+```
 
-## 📸 UI Preview
+Linux/macOS:
 
-  - Only a sample screenshot is shown below. There are more views available in the system.
-Run the project locally to explore the full interface and features.
+```bash
+python -m venv venv
+source venv/bin/activate
+```
 
+### 2. Install dependencies
 
-  ### Login Page
-  ![image](https://github.com/user-attachments/assets/e993ce65-fb25-4431-bb81-660fce542c8c)
-  
-  ### HOD Dashboard
-  ![image](https://github.com/user-attachments/assets/9b7e69d8-13a4-4e88-8675-66bf5d079a76)
-  
-  ### HOD Update Profile
-  
-  ![image](https://github.com/user-attachments/assets/077c1e84-45b2-48ac-b1e7-1d40088e4bb9)
-  
-  ### HOD Update Profile
-  
-  ![image](https://github.com/user-attachments/assets/0b9ea492-c8fb-4f42-988b-9a0dd58b08e1)
-  
-  ### Add Course
-  
-  ![image](https://github.com/user-attachments/assets/018e84a9-cc68-4640-a12c-733b8e4eff9e)
-  
-  ### Staff Creation  
-  
-  ![image](https://github.com/user-attachments/assets/0741ded4-0d6e-4b2a-b3a9-0e336d587667)
-  
-  ### Add Subject
-  
-  ![image](https://github.com/user-attachments/assets/871e6c03-059a-4b2c-9284-a01efdee49cf)
-  
-  ### Student Creation
-  
-  ![image](https://github.com/user-attachments/assets/b567cc78-f9aa-4831-acce-bf7d9b619b9e)
-  
-  ### Send Notifications (Staff)
-  
-  ![image](https://github.com/user-attachments/assets/c29baee0-967b-4ba2-9443-413492f0d93b)
-  
-  ### Send Notifications (Student)
-  
-  ![image](https://github.com/user-attachments/assets/8036e0f4-65fd-45f5-b6c5-d0a262457927)
+```bash
+pip install -r requirements.txt
+```
 
-  ### Staff Dashboard
-  
-  ![image](https://github.com/user-attachments/assets/336c1407-22b3-4c13-82eb-4af6bac371fe)
+### 3. Apply migrations
 
+```bash
+python manage.py migrate
+```
 
----
+### 4. Create a superuser
 
+```bash
+python manage.py createsuperuser
+```
 
-## 🔭 Future Scope
+### 5. Run the server
 
-  ✅ Notification System (Email/SMS)
-  
-  ✅ Push Notifications using WebSockets
-  
-  ✅ Google GenAI for auto-suggestion of materials
-  
-  ✅ Assignment Plagiarism Checker
-  
-  ✅ Graph-based performance dashboards for students
-  
-  ✅ Mobile App Integration using React Native or Flutter
-  
-  ✅ Multilingual Support
+```bash
+python manage.py runserver
+```
 
+Then open:
+
+```text
+http://127.0.0.1:8000/
+```
+
+## Important Notes
+
+- This project uses a custom user model: `main_app.CustomUser`
+- login uses email instead of username
+- `db.sqlite3` is the default database
+- sample XLSX files are included for the current import contract
+- some features are implemented through `csrf_exempt` AJAX endpoints and should be hardened before production
+- settings are currently development-oriented and not production-safe as-is
+
+## Recent Functional Additions
+
+- parent role integrated into login and dashboard flow
+- parent-to-student link via student `roll_number`
+- student suspension support
+- semester result publishing and XLSX import
+- grouped semester result display
+- dashboard notification clear without deleting notification history
+- staff leave request with substitute teacher
+- bulk delete actions for manage pages
+
+## Testing
+
+There is only a small smoke-test set at the moment.
+
+Run tests with:
+
+```bash
+python manage.py test
+```
+
+## Limitations
+
+Current limitations in the codebase:
+
+- many AJAX endpoints still use `csrf_exempt`
+- deployment settings still need hardening
+- test coverage is still minimal
+- static assets still contain duplicate vendor files
+- internal naming still uses `Session` in code while the UI shows `Section`
+
+## Documentation
+
+For a deeper project-level review, see:
+
+- [`PROJECT_DEEP_ANALYSIS.txt`](./PROJECT_DEEP_ANALYSIS.txt)

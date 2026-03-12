@@ -1,0 +1,406 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{ page_title }}{% endblock page_title %}
+
+{% block custom_css %}
+<style>
+    .notification-filter-bar {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .notification-filter-btn {
+        border: 0;
+        border-radius: 14px;
+        padding: 0.8rem 1rem;
+        font-weight: 700;
+        background: rgba(22, 33, 20, 0.08);
+        color: var(--camp-ink);
+    }
+
+    .notification-filter-btn.is-active {
+        background: linear-gradient(135deg, var(--camp-primary), #36916e);
+        color: #fff;
+    }
+
+    .notification-panel {
+        display: none;
+    }
+
+    .notification-panel.is-visible {
+        display: block;
+    }
+
+    .notification-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .notification-summary-card {
+        border-radius: 18px;
+        padding: 1.1rem;
+        background: rgba(31, 111, 87, 0.06);
+        border: 1px solid rgba(22, 33, 20, 0.08);
+    }
+
+    .notification-summary-card strong {
+        display: block;
+        font-size: 1.55rem;
+        font-family: "Space Grotesk", sans-serif;
+    }
+
+    .notification-header-action {
+        margin-left: auto;
+    }
+</style>
+{% endblock custom_css %}
+
+{% block content %}
+<div class="card camp-table-card">
+    <div class="card-header camp-card-header">
+        <div class="camp-card-header-copy">
+            <h3 class="card-title">{{ page_title }}</h3>
+        </div>
+        <a href="#" class="camp-header-action notification-header-action" data-toggle="modal" data-target="#notificationModal" id="openSendAllModal">
+            <i class="fas fa-paper-plane"></i>
+            <span>Send Notification</span>
+        </a>
+    </div>
+    <div class="card-body">
+        <div id="notification_status" style="display:none;" class="alert"></div>
+
+        <div class="notification-filter-bar mb-4">
+            <button type="button" class="notification-filter-btn is-active" data-filter="all">All</button>
+            <button type="button" class="notification-filter-btn" data-filter="students">Students</button>
+            <button type="button" class="notification-filter-btn" data-filter="staff">Staff</button>
+            <button type="button" class="notification-filter-btn" data-filter="parents">Parents</button>
+        </div>
+
+        <div class="notification-panel is-visible" data-panel="all">
+            <div class="notification-summary-grid">
+                <div class="notification-summary-card">
+                    <span class="text-muted">Students</span>
+                    <strong>{{ students|length }}</strong>
+                    <span>Included when sending to all.</span>
+                </div>
+                <div class="notification-summary-card">
+                    <span class="text-muted">Staff</span>
+                    <strong>{{ allStaff|length }}</strong>
+                    <span>Included when sending to all.</span>
+                </div>
+                <div class="notification-summary-card">
+                    <span class="text-muted">Parents</span>
+                    <strong>{{ parents|length }}</strong>
+                    <span>Included when sending to all.</span>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-info">
+                            <tr>
+                                <th colspan="5">Students</th>
+                            </tr>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Course</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ student.last_name }}, {{ student.first_name }}</td>
+                                <td>{{ student.email }}</td>
+                                <td>{{ student.student.course.name }}</td>
+                                <td><button class="btn btn-primary open-single-notification" data-category="student" data-id="{{ student.id }}" data-name="{{ student.last_name }}, {{ student.first_name }}" data-toggle="modal" data-target="#notificationModal">Send Notification</button></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-info">
+                            <tr>
+                                <th colspan="5">Staff</th>
+                            </tr>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Course</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for staff in allStaff %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ staff.last_name }}, {{ staff.first_name }}</td>
+                                <td>{{ staff.email }}</td>
+                                <td>{{ staff.staff.course.name }}</td>
+                                <td><button class="btn btn-primary open-single-notification" data-category="staff" data-id="{{ staff.id }}" data-name="{{ staff.last_name }}, {{ staff.first_name }}" data-toggle="modal" data-target="#notificationModal">Send Notification</button></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-info">
+                            <tr>
+                                <th colspan="5">Parents</th>
+                            </tr>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Linked Student</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for parent in parents %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ parent.last_name }}, {{ parent.first_name }}</td>
+                                <td>{{ parent.email }}</td>
+                                <td>{% if parent.parent.student %}{{ parent.parent.student.roll_number }}{% else %}No student linked{% endif %}</td>
+                                <td><button class="btn btn-primary open-single-notification" data-category="parent" data-id="{{ parent.id }}" data-name="{{ parent.last_name }}, {{ parent.first_name }}" data-toggle="modal" data-target="#notificationModal">Send Notification</button></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="notification-panel" data-panel="students">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-info">
+                        <tr>
+                            <th>#</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Course</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ student.last_name }}, {{ student.first_name }}</td>
+                            <td>{{ student.email }}</td>
+                            <td>{{ student.student.course.name }}</td>
+                            <td><button class="btn btn-primary open-single-notification" data-category="student" data-id="{{ student.id }}" data-name="{{ student.last_name }}, {{ student.first_name }}" data-toggle="modal" data-target="#notificationModal">Send Notification</button></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="notification-panel" data-panel="staff">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-info">
+                        <tr>
+                            <th>#</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Course</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for staff in allStaff %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ staff.last_name }}, {{ staff.first_name }}</td>
+                            <td>{{ staff.email }}</td>
+                            <td>{{ staff.staff.course.name }}</td>
+                            <td><button class="btn btn-primary open-single-notification" data-category="staff" data-id="{{ staff.id }}" data-name="{{ staff.last_name }}, {{ staff.first_name }}" data-toggle="modal" data-target="#notificationModal">Send Notification</button></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="notification-panel" data-panel="parents">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-info">
+                        <tr>
+                            <th>#</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Linked Student</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for parent in parents %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ parent.last_name }}, {{ parent.first_name }}</td>
+                            <td>{{ parent.email }}</td>
+                            <td>{% if parent.parent.student %}{{ parent.parent.student.roll_number }}{% else %}No student linked{% endif %}</td>
+                            <td><button class="btn btn-primary open-single-notification" data-category="parent" data-id="{{ parent.id }}" data-name="{{ parent.last_name }}, {{ parent.first_name }}" data-toggle="modal" data-target="#notificationModal">Send Notification</button></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="notificationModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Send Notification</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="notification_target_label" class="text-muted mb-3">This message will be sent to all students, staff, and parents.</p>
+                <div class="form-group mb-0">
+                    <input type="text" id="notification_message" class="form-control" placeholder="Enter your message here">
+                    <input type="hidden" id="notification_category" value="all">
+                    <input type="hidden" id="notification_target_id" value="">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" id="sendNotificationButton" class="btn btn-success">Send Notification</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block custom_js %}
+<script>
+    let activeNotificationFilter = "all";
+
+    function showStatus(message, kind) {
+        $("#notification_status")
+            .removeClass("alert-success alert-danger")
+            .addClass(kind === "success" ? "alert-success" : "alert-danger")
+            .text(message)
+            .show();
+    }
+
+    function setActivePanel(filter) {
+        activeNotificationFilter = filter;
+        $(".notification-filter-btn").removeClass("is-active");
+        $('.notification-filter-btn[data-filter="' + filter + '"]').addClass("is-active");
+        $(".notification-panel").removeClass("is-visible");
+        $('.notification-panel[data-panel="' + filter + '"]').addClass("is-visible");
+    }
+
+    $(".notification-filter-btn").on("click", function () {
+        setActivePanel($(this).data("filter"));
+    });
+
+    $("#openSendAllModal").on("click", function () {
+        $("#notification_category").val(activeNotificationFilter);
+        $("#notification_target_id").val("");
+        $("#notification_message").val("");
+        if (activeNotificationFilter === "all") {
+            $("#notification_target_label").text("This message will be sent to all students, staff, and parents.");
+        } else if (activeNotificationFilter === "students") {
+            $("#notification_target_label").text("This message will be sent to all students.");
+        } else if (activeNotificationFilter === "staff") {
+            $("#notification_target_label").text("This message will be sent to all staff.");
+        } else if (activeNotificationFilter === "parents") {
+            $("#notification_target_label").text("This message will be sent to all parents.");
+        }
+    });
+
+    $(".open-single-notification").on("click", function () {
+        const category = $(this).data("category");
+        const name = $(this).data("name");
+        $("#notification_category").val(category);
+        $("#notification_target_id").val($(this).data("id"));
+        $("#notification_message").val("");
+        $("#notification_target_label").text("This message will be sent to " + name + ".");
+    });
+
+    $("#sendNotificationButton").on("click", function () {
+        const category = $("#notification_category").val();
+        const targetId = $("#notification_target_id").val();
+        const message = $("#notification_message").val().trim();
+        const button = $(this);
+
+        if (!message) {
+            showStatus("Please enter a notification message.", "error");
+            return;
+        }
+
+        let url = "";
+        let data = { message: message };
+
+        if (category === "all") {
+            url = "{% url 'send_notification_to_everyone' %}";
+        } else if (category === "students") {
+            url = "{% url 'send_student_notification_to_all' %}";
+        } else if (category === "staff") {
+            url = "{% url 'send_staff_notification_to_all' %}";
+        } else if (category === "parents") {
+            url = "{% url 'send_parent_notification_to_all' %}";
+        } else if (category === "student") {
+            url = "{% url 'send_student_notification' %}";
+            data.id = targetId;
+        } else if (category === "staff") {
+            url = "{% url 'send_staff_notification' %}";
+            data.id = targetId;
+        } else if (category === "parent") {
+            url = "{% url 'send_parent_notification' %}";
+            data.id = targetId;
+        }
+
+        button.prop("disabled", true).text("Sending...");
+        $("#notification_status").hide();
+
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: data
+        }).done(function (response) {
+            if ((["all", "students", "staff", "parents"].includes(category) && response.success) || (!["all", "students", "staff", "parents"].includes(category) && response == "True")) {
+                $("#notificationModal").modal("hide");
+                if (category === "all") {
+                    showStatus("Notification sent to all students, staff, and parents.", "success");
+                } else if (category === "students") {
+                    showStatus("Notification sent to all students.", "success");
+                } else if (category === "staff") {
+                    showStatus("Notification sent to all staff.", "success");
+                } else if (category === "parents") {
+                    showStatus("Notification sent to all parents.", "success");
+                } else {
+                    showStatus("Notification sent successfully.", "success");
+                }
+                $("#notification_message").val("");
+                $("#notification_target_id").val("");
+                $("#notification_category").val("all");
+            } else {
+                showStatus("Notification could not be saved. Please try again.", "error");
+            }
+        }).fail(function () {
+            showStatus("Error sending notification.", "error");
+        }).always(function () {
+            button.prop("disabled", false).text("Send Notification");
+        });
+    });
+</script>
+{% endblock custom_js %}

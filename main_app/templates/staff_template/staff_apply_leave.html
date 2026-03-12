@@ -3,58 +3,83 @@
 {% block page_title %}{{page_title}}{% endblock page_title %}
 
 {% block content %}
-
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <!-- general form elements -->
-                <div class="card card-info">
-                    <div class="card-header">
-                        <h3 class="card-title">{{page_title}}</h3>
-                    </div>
-
-                    {% include "main_app/form_template.html" with messages=messages  form=form button_text="Apply For Leave"%}
+<div class="row">
+    <div class="col-12">
+        <div class="card camp-form-card">
+            {% include "main_app/form_template.html" with messages=messages form=form button_text="Request Leave Approval" %}
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="card camp-table-card">
+            <div class="card-header camp-card-header">
+                <div class="camp-card-header-copy">
+                    <h3 class="card-title">Leave History</h3>
+                    <p>Track your request status and the substitute teacher assigned to each leave.</p>
                 </div>
-                <!-- /.card -->
-<div class="card card-default">
-    <div class="card-header"><h3 class="card-title"><b>Leave History</b></h3>
-   <div class="table">
-
-       <table class="table table-bordered table-hover">
-           <thead class="table-info">
-            <tr>
-                <th>ID</th>
-                <th>Date</th>
-                <th>Message</th>
-             <th>Status</th>
-         </tr>
-           </thead>
-        {% for leave in leave_history %}
-        <tr>
-            <td>{{forloop.counter}}</td>
-            <td>{{leave.date}}</td>
-              <td>{{leave.message}}</td>
-              <td>
-                  
-                  {% if leave.status == 0 %}
-                  <span class="badge badge-warning">Pending</span>
-                  {% elif leave.status == 1 %}
-                  <span class="badge badge-success">Accepted</span>
-                  
-                    {% else %}
-                    <span class="badge badge-danger">Rejected</span>
-                    
-                    {% endif %}
-                    
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
-    </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Leave Date</th>
+                                <th>Substitute Teacher</th>
+                                <th>Reason</th>
+                                <th>Substitute Status</th>
+                                <th>HOD Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for leave in leave_history %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ leave.date }}</td>
+                                <td>
+                                    {% if leave.substitute_staff %}
+                                    {{ leave.substitute_staff.admin.last_name }}, {{ leave.substitute_staff.admin.first_name }}
+                                    {% else %}
+                                    Not assigned
+                                    {% endif %}
+                                </td>
+                                <td>{{ leave.message }}</td>
+                                <td>
+                                    {% if leave.substitute_status == 1 %}
+                                    <span class="badge badge-success">Accepted</span>
+                                    {% elif leave.substitute_status == -1 %}
+                                    <span class="badge badge-danger">Declined</span>
+                                    {% else %}
+                                    <span class="badge badge-warning">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if leave.substitute_status == -1 %}
+                                    <span class="badge badge-danger">Stopped</span>
+                                    {% elif leave.status == 1 %}
+                                    <span class="badge badge-success">Approved</span>
+                                    {% else %}
+                                    {% if leave.status == -1 %}
+                                    <span class="badge badge-danger">Rejected</span>
+                                    {% elif leave.substitute_status == 1 %}
+                                    <span class="badge badge-warning">Pending HOD</span>
+                                    {% else %}
+                                    <span class="badge badge-secondary">Waiting Substitute</span>
+                                    {% endif %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6">No leave requests submitted yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</section>
+</div>
 {% endblock content %}

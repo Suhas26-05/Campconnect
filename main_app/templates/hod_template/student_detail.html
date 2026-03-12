@@ -1,0 +1,131 @@
+{% extends 'main_app/base.html' %}
+{% block page_title %}{{ page_title }}{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">Student Summary</h3>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Name:</strong> {{ student.admin.first_name }} {{ student.admin.last_name }}</p>
+                        <p><strong>Roll Number:</strong> {{ student.roll_number }}</p>
+                        <p><strong>Email:</strong> {{ student.admin.email }}</p>
+                        <p><strong>Course:</strong> {{ student.course }}</p>
+                        <p><strong>Section:</strong> {{ student.session }}</p>
+                        <p><strong>Status:</strong> {% if student.is_suspended %}Suspended{% else %}Active{% endif %}</p>
+                    </div>
+                </div>
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">Linked Parents</h3>
+                    </div>
+                    <div class="card-body">
+                        {% for parent in parents %}
+                        <p>{{ parent.admin.first_name }} {{ parent.admin.last_name }} - {{ parent.admin.email }}</p>
+                        {% empty %}
+                        <p>No parent linked.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">Results</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if semester_groups %}
+                        <div class="mb-4">
+                            <h4 class="h6 font-weight-bold mb-3">Semester Results</h4>
+                            {% for semester_group in semester_groups %}
+                            <div class="{% if not forloop.last %}mb-4{% endif %}">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <strong>{{ semester_group.semester_name }}</strong>
+                                    <span class="text-muted">{{ semester_group.results|length }} subjects</span>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Subject</th>
+                                                <th>Internal</th>
+                                                <th>External</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for result in semester_group.results %}
+                                            <tr>
+                                                <td>{{ result.subject.name }}</td>
+                                                <td>{{ result.test }}</td>
+                                                <td>{{ result.exam }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Name</th>
+                                    <th>Subject</th>
+                                    <th>Internal</th>
+                                    <th>External</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in results %}
+                                <tr>
+                                    <td>{{ result.get_result_type_display }}</td>
+                                    <td>{{ result.assessment_name }}</td>
+                                    <td>{{ result.subject.name }}</td>
+                                    <td>{{ result.test }}</td>
+                                    <td>{{ result.exam }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5">No results found.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">Attendance History</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Subject</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in attendance_reports %}
+                                <tr>
+                                    <td>{{ report.attendance.date }}</td>
+                                    <td>{{ report.attendance.subject.name }}</td>
+                                    <td>{% if report.status %}Present{% else %}Absent{% endif %}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3">No attendance records found.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

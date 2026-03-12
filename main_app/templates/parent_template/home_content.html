@@ -1,109 +1,225 @@
 {% extends 'main_app/base.html' %}
-{% load static %}
-{% block page_title %}{{page_title}}{% endblock page_title %}
+{% block page_title %}{{ page_title }}{% endblock page_title %}
+
+{% block custom_css %}
+<style>
+    .dashboard-notification-list {
+        display: grid;
+        gap: 0.9rem;
+    }
+
+    .dashboard-notification-item {
+        padding: 1rem 1.05rem;
+        border-radius: 18px;
+        background: rgba(31, 111, 87, 0.06);
+        border: 1px solid rgba(22, 33, 20, 0.08);
+    }
+
+    .dashboard-notification-time {
+        display: block;
+        margin-top: 0.45rem;
+        color: var(--camp-muted);
+        font-size: 0.8rem;
+    }
+
+    .dashboard-card-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        margin-left: auto;
+        flex-wrap: wrap;
+    }
+
+    .dashboard-clear-form {
+        margin: 0;
+    }
+
+    .dashboard-clear-button {
+        border: 0;
+        cursor: pointer;
+        background: rgba(163, 59, 32, 0.12);
+        color: var(--camp-danger);
+    }
+</style>
+{% endblock custom_css %}
+
 {% block content %}
-<section class="content">
-    <div class="container-fluid">
-        <!-- Small boxes (Stat box) -->
-        <div class="row">
-            <!-- ./col -->
-            <div class="col-lg-5 col-6">
-                <!-- small box for notifications -->
-                <div class="small-box bg-success">
-                    <div class="inner">
-                        <h3>Notifications</h3>
-                        <p>New Notifications</p>
-                    </div>
-                    <div class="icon">
-                      <i class="nav-icon fas fa-bell"></i>
-                    </div>
-                    <a href="{% url 'parent_view_notification' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header camp-card-header">
+                <div class="camp-card-header-copy">
+                    <h3 class="card-title">Recent Notifications</h3>
+                    <p>Updates about your linked student appear here as soon as staff or HOD sends them.</p>
+                </div>
+                <div class="dashboard-card-actions">
+                    <form method="post" action="{% url 'parent_clear_notifications' %}" class="dashboard-clear-form">
+                        {% csrf_token %}
+                        <button type="submit" class="camp-header-action dashboard-clear-button">
+                            <i class="fas fa-trash-alt"></i>
+                            <span>Clear</span>
+                        </button>
+                    </form>
+                    <a href="{% url 'parent_view_notification' %}" class="camp-header-action">
+                        <i class="fas fa-bell"></i>
+                        <span>View All</span>
+                    </a>
                 </div>
             </div>
-            
-            <div class="col-lg-5 col-6">
-              <div class="small-box bg-info">
-                  <div class="inner">
-                      <h3>Parent Feedback</h3>
-
-                      <p>Send message to HOD</p>
-                  </div>
-                  <div class="icon">
-                    <i class="nav-icon fas fa-paper-plane"></i>
-                  </div>
-                  <a href="{% url 'parent_feedback' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-
-              </div>
-          </div>
-            <!-- ./col -->
-        </div>
-        <!-- /.row -->
-        <!-- Main row for graph -->
-        <div class="row">
-            <div class="col-md-12">
-                <!-- Attendance Graph -->
-                <div class="card card-info">
-                  <div class="card-header">
-                    <h3 class="card-title">Today's Attendance</h3>
-                    <div class="card-tools">
-                      <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
-                      <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
+            <div class="card-body">
+                <div class="dashboard-notification-list">
+                    {% for notification in recent_notifications %}
+                    <div class="dashboard-notification-item">
+                        <strong>{{ notification.message }}</strong>
+                        <span class="dashboard-notification-time">{{ notification.created_at|date:"M d, Y h:i A" }}</span>
                     </div>
-                  </div>
-                  <div class="card-body">
-                    <div class="chart">
-                      <canvas id="attendanceGraph" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                    {% empty %}
+                    <div class="dashboard-notification-item">
+                        <strong>No notifications yet.</strong>
+                        <span class="dashboard-notification-time">Attendance and result updates will appear here.</span>
                     </div>
-                  </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
-        <!-- /.row (main row) -->
-    </div><!-- /.container-fluid -->
-</section>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-3 col-sm-6">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>{{ attendance_count }}</h3>
+                <p>Total Attendance Records</p>
+            </div>
+            <div class="icon">
+                <i class="nav-icon fas fa-calendar-alt"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>{{ present_count }}</h3>
+                <p>Present Records</p>
+            </div>
+            <div class="icon">
+                <i class="nav-icon fas fa-check"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="small-box bg-danger">
+            <div class="inner">
+                <h3>{{ absent_count }}</h3>
+                <p>Absent Records</p>
+            </div>
+            <div class="icon">
+                <i class="nav-icon fas fa-times"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="small-box bg-primary">
+            <div class="inner">
+                <h3>{{ results|length }}</h3>
+                <p>Published Results</p>
+            </div>
+            <div class="icon">
+                <i class="nav-icon fas fa-poll"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Linked Student</h3>
+            </div>
+            <div class="card-body">
+                {% if student %}
+                <p><strong>Name:</strong> {{ student.admin.first_name }} {{ student.admin.last_name }}</p>
+                <p><strong>Roll Number:</strong> {{ student.roll_number }}</p>
+                <p><strong>Course:</strong> {{ student.course }}</p>
+                <p><strong>Section:</strong> {{ student.session }}</p>
+                {% else %}
+                <p>No student linked yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Student Results</h3>
+            </div>
+            <div class="card-body">
+                {% if semester_groups %}
+                <div class="mb-4">
+                    <h4 class="h6 font-weight-bold mb-3">Semester Results</h4>
+                    {% for semester_group in semester_groups %}
+                    <div class="{% if not forloop.last %}mb-4{% endif %}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <strong>{{ semester_group.semester_name }}</strong>
+                            <span class="text-muted">{{ semester_group.results|length }} subjects</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>Internal</th>
+                                        <th>External</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for result in semester_group.results %}
+                                    <tr>
+                                        <td>{{ result.subject.name }}</td>
+                                        <td>{{ result.test }}</td>
+                                        <td>{{ result.exam }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Name</th>
+                                <th>Subject</th>
+                                <th>Internal</th>
+                                <th>External</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in results %}
+                            <tr>
+                                <td>{{ result.get_result_type_display }}</td>
+                                <td>{{ result.assessment_name }}</td>
+                                <td>{{ result.subject.name }}</td>
+                                <td>{{ result.test }}</td>
+                                <td>{{ result.exam }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5">No results available.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock content %}
-
-{% block custom_js %}
-<script>
-    $(document).ready(function() {
-        // Generate random attendance data
-        var totalClasses = 6; // Total classes (adjust as needed)
-        var attended = Math.floor(Math.random() * totalClasses); // Random attended classes
-        var missed = totalClasses - attended; // Calculate missed classes
-
-        var studentAttendanceData = {
-            labels: ['Attended', 'Missed'], // Categories for the bar graph
-            datasets: [
-              {
-                label: 'Attendance Summary',
-                data: [attended, missed], // Data for the bars
-                backgroundColor: ['#00a65a', '#f39c12'], // Bar colors
-                borderColor: ['#007b4a', '#d68c0e'], // Optional border colors
-                borderWidth: 1
-              }
-            ]
-        };
-
-        var barChartCanvas = $('#attendanceGraph').get(0).getContext('2d');
-        var barOptions = {
-          maintainAspectRatio: false,
-          responsive: true,
-          scales: {
-              y: {
-                  beginAtZero: true, // Y-axis starts at 0
-              }
-          }
-        };
-
-        var barChart = new Chart(barChartCanvas, {
-          type: 'bar', // Change to 'bar' for a bar graph
-          data: studentAttendanceData,
-          options: barOptions,
-        });
-
-        // Log values for debugging
-        console.log("Attended: " + attended + ", Missed: " + missed);
-    });
-</script>
-{% endblock custom_js %}
-

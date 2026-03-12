@@ -1,104 +1,20 @@
 {% extends 'main_app/base.html' %}
-{% load static %}
-
-{% block custom_css %}
-<style>
-    .invalid{
-      font-style: italic;
-      font-weight: bold;
-      color: red;
-    }
-    .valid{
-      font-style: italic;
-      font-weight: bold;
-      color: green;
-    }
-    /* Form container styling */
-      form {
-          padding: 20px;
-          background-color: #f9f9f9;
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
-
-      /* Label styling */
-      form label {
-          display: block;
-          font-weight: bold;
-          font-size: 1.1em;
-          margin-bottom: 8px;
-          color: #333;
-      }
-
-      /* Input field styling */
-      form input[type="file"] {
-          display: block;
-          margin-bottom: 15px;
-          padding: 5px;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          font-size: 1em;
-      }
-
-      /* Submit button styling */
-      form button[type="submit"] {
-          display: inline-block;
-          padding: 10px 20px;
-          background-color: #264653;
-          color: #fff;
-          font-weight: bold;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          transition: background-color 0.3s ease;
-      }
-
-      form button[type="submit"]:hover {
-          background-color: #264653;
-      }
-
-      /* Optional styling for responsiveness */
-      @media (max-width: 600px) {
-          form {
-              padding: 15px;
-          }
-          form label {
-              font-size: 1em;
-          }
-          form button[type="submit"] {
-              width: 100%;
-          }
-      }
-
-</style>
-{% endblock custom_css %}
-
 {% block page_title %}{{ page_title }}{% endblock page_title %}
 
 {% block content %}
 <section class="content">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-12">
-                <div class="card card-info">
+            <div class="col-lg-8">
+                <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{ page_title }}</h3>
+                        <h3 class="card-title">Single Student Creation</h3>
                     </div>
-
-                    <!-- Add your existing student form here -->
-                    {% include "main_app/form_template.html" with messages=messages form=form button_text="Add Student" %}
-
-                    <!-- XLSX Upload Form -->
-                    <form action="{% url 'add_students_from_xlsx' %}" method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="xlsx_file">Upload XLSX File for Students</label>
-                            <input type="file" name="xlsx_file" accept=".xlsx" class="form-control" required>
-                        </div>
-                        <button type="submit" class="btn btn-success">Upload Students</button>
-                    </form>
+                    {% include "main_app/form_template.html" with form=form button_text="Create Student" %}
                 </div>
+            </div>
+            <div class="col-lg-4">
+                {% include "main_app/bulk_upload_panel.html" %}
             </div>
         </div>
     </div>
@@ -111,30 +27,27 @@
         const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(String(email).toLowerCase());
     }
-    $(document).ready(function(){
-        $("#id_email").keyup(function(){
-            
-            var email = $(this).val()
-            if (validateEmail(email)){
+
+    $(document).ready(function () {
+        $("#id_email").on("keyup", function () {
+            const email = $(this).val();
+            if (!validateEmail(email)) {
+                return;
+            }
+
             $.ajax({
                 url: "{% url 'check_email_availability' %}",
-                type: 'POST',
-                data:{email:email}
-            }).done(function(response){
-                if (response == "True"){
-                    $(".email_error").remove()
-                    $("<span class='invalid email_error'>Email Address Already Exist</span>").insertAfter("#id_email");
+                type: "POST",
+                data: { email: email }
+            }).done(function (response) {
+                $(".email_error").remove();
+                if (response == "True") {
+                    $("<span class='text-danger small email_error'>Email address already exists.</span>").insertAfter("#id_email");
+                } else {
+                    $("<span class='text-success small email_error'>Email address available.</span>").insertAfter("#id_email");
                 }
-                else{
-                    $(".email_error").remove()
-
-                    $("<span class='valid email_error'>Email Address Available</span>").insertAfter("#id_email");
-                }
-            }).fail(function(response){
-                $("<span class='alert alert-warning'>Server Could Not Process This</span>").insertAfter("#id_email");
-            })
-        }
-        })
+            });
+        });
     });
 </script>
 {% endblock custom_js %}

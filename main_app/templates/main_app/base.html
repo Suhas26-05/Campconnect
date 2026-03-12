@@ -1,158 +1,876 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="shortcut icon" type="image/x-icon" href="{% static 'dist/img/logo.png' %} ">
-    <title>CampConnect</title>
-    <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css'%} ">
-    <!-- Ionicons -->
-    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-    <!-- Tempusdominus Bbootstrap 4 -->
-    <link rel="stylesheet"
-        href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css'%} ">
-    <!-- iCheck -->
-    <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css'%} ">
-    
-    <!-- Theme style -->
-    <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css'%} ">
-    <!-- overlayScrollbars -->
-    <link rel="stylesheet" href="{% static 'plugins/overlayScrollbars/css/OverlayScrollbars.min.css'%} ">
-    <!-- Daterange picker -->
-    <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css'%} ">
-    
-    <!-- Google Font: Source Sans Pro -->
-    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
-    {% block custom_css %}
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'dist/img/logo.png' %}">
+    <title>CampConnect</title>
+    <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/overlayScrollbars/css/OverlayScrollbars.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --camp-bg: #f3f6ef;
+            --camp-panel: rgba(255, 255, 255, 0.92);
+            --camp-ink: #162114;
+            --camp-muted: #617162;
+            --camp-line: rgba(22, 33, 20, 0.1);
+            --camp-primary: #1f6f57;
+            --camp-primary-deep: #134233;
+            --camp-accent: #edae49;
+            --camp-danger: #a33b20;
+            --camp-sidebar: #13211d;
+            --camp-sidebar-text: rgba(245, 248, 243, 0.72);
+            --camp-shadow: 0 24px 60px rgba(30, 54, 42, 0.12);
+            --camp-radius: 24px;
+        }
 
-    {% endblock custom_css %}
+        body {
+            font-family: "Plus Jakarta Sans", sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(237, 174, 73, 0.25), transparent 26%),
+                radial-gradient(circle at top right, rgba(31, 111, 87, 0.18), transparent 24%),
+                linear-gradient(180deg, #eff5ea 0%, #f7faf5 100%);
+            color: var(--camp-ink);
+            overflow-x: hidden;
+        }
+
+        html,
+        body {
+            height: 100%;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+
+        .wrapper {
+            min-height: 100vh;
+        }
+
+        .camp-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 300px;
+            background: linear-gradient(180deg, #12211c 0%, #193229 100%);
+            color: #f1f5ef;
+            box-shadow: 24px 0 60px rgba(8, 18, 14, 0.16);
+            overflow: hidden;
+            z-index: 1040;
+            border-right: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .camp-shell {
+            margin-left: 0;
+            width: calc(100vw - 300px);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            left: 300px;
+            max-width: calc(100vw - 300px);
+        }
+
+        body.camp-sidebar-collapsed .camp-sidebar {
+            width: 96px;
+        }
+
+        body.camp-sidebar-collapsed .camp-shell {
+            width: calc(100vw - 96px);
+            left: 96px;
+            max-width: calc(100vw - 96px);
+        }
+
+        .camp-header {
+            margin-left: 0;
+            width: 100%;
+            border-bottom: 1px solid var(--camp-line);
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 35px rgba(20, 34, 27, 0.06);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 1035;
+        }
+
+        .brand-link {
+            border-bottom: 1px solid rgba(255,255,255,0.09);
+            padding: 1.4rem 1.25rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+        }
+
+        .brand-link img {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            object-fit: cover;
+            background: rgba(255,255,255,0.12);
+            padding: 6px;
+        }
+
+        .brand-copy {
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.camp-sidebar-collapsed .brand-link {
+            justify-content: center;
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        body.camp-sidebar-collapsed .brand-copy {
+            display: none;
+        }
+
+        .brand-title {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 1.08rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: #f8faf7;
+        }
+
+        .brand-subtitle {
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.58);
+        }
+
+        .sidebar {
+            padding: 1.25rem 1rem 1rem;
+            height: calc(100vh - 88px);
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+
+        .sidebar-profile {
+            display: flex;
+            gap: 0.95rem;
+            align-items: center;
+            padding: 0.95rem;
+            margin-bottom: 1rem;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.07);
+            text-decoration: none;
+            transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+        }
+
+        body.camp-sidebar-collapsed .sidebar-profile {
+            justify-content: center;
+            padding: 0.8rem;
+        }
+
+        body.camp-sidebar-collapsed .sidebar-profile img {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+        }
+
+        .sidebar-profile:hover {
+            transform: translateY(-1px);
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.16);
+        }
+
+        .sidebar-profile img {
+            object-fit: cover;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .sidebar-profile img {
+            width: 54px;
+            height: 54px;
+        }
+
+        body.camp-sidebar-collapsed .sidebar-profile > div {
+            display: none;
+        }
+
+        .sidebar-role {
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: rgba(255,255,255,0.55);
+            margin-bottom: 0.15rem;
+        }
+
+        .sidebar-name {
+            color: #f8faf7;
+            font-weight: 700;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        .sidebar-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.42rem 0.7rem;
+            margin-top: 0.55rem;
+            border-radius: 999px;
+            background: rgba(237, 174, 73, 0.14);
+            color: #f9cd7c;
+            font-size: 0.76rem;
+        }
+
+        .nav-sidebar .nav-item {
+            margin-bottom: 0.32rem;
+        }
+
+        .nav-sidebar .nav-link {
+            color: var(--camp-sidebar-text);
+            border-radius: 16px;
+            padding: 0.85rem 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            min-height: 52px;
+        }
+
+        .nav-sidebar .nav-link .nav-icon {
+            margin-right: 0.65rem;
+            font-size: 0.96rem;
+            width: 1.3rem;
+        }
+
+        body.camp-sidebar-collapsed .sidebar {
+            padding-left: 0.7rem;
+            padding-right: 0.7rem;
+        }
+
+        body.camp-sidebar-collapsed .nav-sidebar .nav-link {
+            justify-content: center;
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        body.camp-sidebar-collapsed .nav-sidebar .nav-link .nav-icon {
+            margin-right: 0;
+            font-size: 1.05rem;
+            width: auto;
+        }
+
+        body.camp-sidebar-collapsed .nav-sidebar .nav-link p {
+            display: none;
+        }
+
+        .nav-sidebar .nav-link:hover,
+        .nav-sidebar .nav-link.active {
+            color: #fff;
+            background: linear-gradient(135deg, rgba(31, 111, 87, 0.95), rgba(55, 140, 99, 0.95));
+            box-shadow: 0 12px 24px rgba(18, 60, 45, 0.28);
+        }
+
+        .camp-content-wrapper {
+            margin-left: 0;
+            width: 100%;
+            background: transparent;
+            min-height: 100vh;
+            padding-bottom: 1rem;
+            flex: 1;
+        }
+
+        .content-header {
+            padding: 1.4rem 1.8rem 0.25rem;
+        }
+
+        .page-eyebrow {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--camp-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .page-title {
+            font-family: "Space Grotesk", sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.7rem, 1.4rem + 1vw, 2.4rem);
+            margin: 0;
+            color: var(--camp-ink);
+        }
+
+        .page-subtitle {
+            color: var(--camp-muted);
+            margin-top: 0.35rem;
+            margin-bottom: 0;
+        }
+
+        .content {
+            padding: 0 1.8rem 2rem;
+            overflow-x: hidden;
+        }
+
+        .content > section.content {
+            padding: 0;
+        }
+
+        .content > section.content > .container-fluid,
+        .content > .container-fluid {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .content .container-fluid .row:last-child {
+            margin-bottom: 0;
+        }
+
+        .camp-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .camp-topbar-left,
+        .camp-topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+        }
+
+        .camp-topbar-left {
+            min-width: 0;
+        }
+
+        .camp-topbar-right {
+            margin-left: auto;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .camp-icon-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            border: 1px solid var(--camp-line);
+            background: rgba(255,255,255,0.78);
+            color: var(--camp-primary-deep);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(18, 35, 27, 0.05);
+            text-decoration: none;
+        }
+
+        .camp-logout {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.78rem 1rem;
+            border-radius: 14px;
+            background: #fff3ef;
+            color: var(--camp-danger);
+            border: 1px solid rgba(163, 59, 32, 0.15);
+            font-weight: 700;
+            text-decoration: none;
+            min-height: 58px;
+            white-space: nowrap;
+        }
+
+        .card,
+        .small-box {
+            border: 0;
+            border-radius: var(--camp-radius);
+            overflow: hidden;
+            box-shadow: var(--camp-shadow);
+            background: var(--camp-panel);
+            backdrop-filter: blur(18px);
+        }
+
+        .card-info,
+        .card-default {
+            border: 0;
+            border-radius: var(--camp-radius);
+            overflow: hidden;
+            box-shadow: var(--camp-shadow);
+            background: var(--camp-panel);
+            backdrop-filter: blur(18px);
+        }
+
+        .card-header {
+            border-bottom: 1px solid var(--camp-line);
+            background: transparent;
+            padding: 1.2rem 1.35rem 1rem;
+        }
+
+        .card-info > .card-header,
+        .card-default > .card-header {
+            border-bottom: 1px solid var(--camp-line);
+            background: transparent;
+            padding: 1.2rem 1.35rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .camp-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .card-title {
+            margin: 0;
+            font-weight: 700;
+            color: var(--camp-ink);
+        }
+
+        .camp-card-header-copy p {
+            margin: 0.3rem 0 0;
+            color: var(--camp-muted);
+        }
+
+        .camp-header-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            border-radius: 14px;
+            padding: 0.8rem 1rem;
+            text-decoration: none;
+            color: #fff;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--camp-primary), #36916e);
+            white-space: nowrap;
+        }
+
+        .camp-header-actions-equal {
+            margin-left: auto;
+            justify-content: flex-end;
+            align-items: stretch;
+        }
+
+        .camp-header-actions-equal form {
+            margin: 0;
+        }
+
+        .camp-header-action-equal {
+            width: 164px;
+            min-width: 164px;
+            justify-content: center;
+            min-height: 48px;
+        }
+
+        .camp-table-card .card-body {
+            padding-top: 0.6rem;
+        }
+
+        .card-body,
+        .card-footer {
+            padding: 1.3rem 1.35rem;
+        }
+
+        .card-info > .card-body,
+        .card-default > .card-body,
+        .card-info > form .card-body,
+        .card-default > form .card-body {
+            padding: 1.3rem 1.35rem;
+        }
+
+        .card-info > .card-footer,
+        .card-default > .card-footer,
+        .card-info > form .card-footer,
+        .card-default > form .card-footer {
+            padding: 1.3rem 1.35rem;
+        }
+
+        .card-body {
+            overflow-wrap: anywhere;
+        }
+
+        .small-box {
+            padding: 1.1rem 1.15rem;
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .small-box .inner {
+            position: relative;
+            z-index: 1;
+            padding-right: 6.5rem;
+        }
+
+        .small-box .inner h3 {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
+            color: var(--camp-ink);
+        }
+
+        .small-box .inner p,
+        .small-box .small-box-footer {
+            color: var(--camp-muted);
+        }
+
+        .small-box .icon {
+            color: rgba(31, 111, 87, 0.18);
+            top: 18px;
+            right: 20px;
+            position: absolute;
+            font-size: 4.4rem;
+            line-height: 1;
+        }
+
+        .small-box.bg-info,
+        .small-box.bg-success,
+        .small-box.bg-danger,
+        .small-box.bg-primary,
+        .small-box.bg-purple,
+        .small-box.bg-maroon {
+            background: var(--camp-panel) !important;
+        }
+
+        .small-box-footer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            margin-top: 1rem;
+            padding: 0.95rem 1rem;
+            border-radius: 16px;
+            background: rgba(22, 33, 20, 0.06);
+            color: var(--camp-primary-deep) !important;
+            font-weight: 700;
+            text-decoration: none;
+            position: relative;
+            z-index: 1;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            border-top: 0;
+            border-bottom: 1px solid var(--camp-line);
+            color: var(--camp-muted);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .table thead.table-info th {
+            background: rgba(31, 111, 87, 0.09);
+            color: var(--camp-primary-deep);
+        }
+
+        .table td {
+            vertical-align: middle;
+            border-color: var(--camp-line);
+        }
+
+        .table-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .btn {
+            border-radius: 14px;
+            font-weight: 700;
+            padding: 0.72rem 1rem;
+            border: 0;
+        }
+
+        .card-header .btn.float-right,
+        .card-header .float-right {
+            margin-left: auto;
+        }
+
+        .btn-success,
+        .btn-primary,
+        .btn-info {
+            background: linear-gradient(135deg, var(--camp-primary), #36916e);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ec9e2f, #f6c04d);
+            color: #2f230b;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #aa4d31, #d36b43);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #546867, #6f8482);
+        }
+
+        .form-control,
+        .custom-file-input,
+        .custom-select {
+            border-radius: 14px;
+            border: 1px solid rgba(22, 33, 20, 0.12);
+            min-height: 48px;
+            padding: 0.72rem 0.9rem;
+            box-shadow: none;
+        }
+
+        textarea.form-control {
+            min-height: 130px;
+        }
+
+        .form-control:focus {
+            border-color: rgba(31, 111, 87, 0.55);
+            box-shadow: 0 0 0 0.18rem rgba(31, 111, 87, 0.12);
+        }
+
+        .alert {
+            border: 0;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(21, 35, 27, 0.08);
+        }
+
+        .custom-file-label {
+            border-radius: 14px;
+            min-height: 48px;
+            padding: 0.72rem 0.9rem;
+            border: 1px solid rgba(22, 33, 20, 0.12);
+            color: var(--camp-muted);
+            overflow: hidden;
+        }
+
+        .custom-file-label::after {
+            border-radius: 0 14px 14px 0;
+            height: 46px;
+            padding-top: 0.72rem;
+        }
+
+        .modal-content {
+            border: 0;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 26px 60px rgba(18, 35, 27, 0.2);
+        }
+
+        .modal-header,
+        .modal-footer {
+            border-color: var(--camp-line);
+            padding: 1rem 1.25rem;
+        }
+
+        .modal-body {
+            padding: 1.25rem;
+        }
+
+        .table-responsive {
+            border-radius: 18px;
+        }
+
+        .camp-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.38rem 0.72rem;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            background: rgba(31, 111, 87, 0.12);
+            color: var(--camp-primary-deep);
+        }
+
+        .camp-main-footer {
+            margin-left: 300px;
+            background: transparent;
+            border-top: 0;
+            color: var(--camp-muted);
+            padding: 0 1.8rem 2rem;
+        }
+
+        @media (max-width: 991.98px) {
+            .camp-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.22s ease;
+                box-shadow: 18px 0 40px rgba(8, 18, 14, 0.22);
+            }
+
+            body.camp-sidebar-open .camp-sidebar {
+                transform: translateX(0);
+            }
+
+            .camp-header,
+            .camp-content-wrapper,
+            .camp-main-footer {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .camp-shell {
+                margin-left: 0;
+                width: 100%;
+                max-width: 100%;
+                left: 0;
+            }
+
+            .content-header,
+            .content,
+            .camp-main-footer {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .camp-topbar {
+                padding: 0.85rem 1rem;
+            }
+
+            .camp-topbar-right {
+                width: 100%;
+                margin-left: 0;
+            }
+
+        }
+
+        @media (max-width: 575.98px) {
+            .camp-topbar-left,
+            .camp-topbar-right {
+                width: 100%;
+            }
+
+            .camp-logout {
+                flex: 1 1 auto;
+                justify-content: center;
+            }
+
+            .small-box {
+                min-height: 190px;
+            }
+
+            .small-box .inner {
+                padding-right: 4.75rem;
+            }
+
+            .small-box .icon {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+    {% block custom_css %}{% endblock custom_css %}
 </head>
-
-<body class="hold-transition sidebar-mini layout-fixed">
+<body class="hold-transition">
     <div class="wrapper">
-
-        <!-- Navbar -->
-            <!-- Left navbar links -->
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                </li>
-
-            </ul>
-
-
-        </nav>
-        <!-- /.navbar -->
-
-        <!-- Main Sidebar Container -->
-          
- 
         {% include "main_app/sidebar_template.html" with user=user %}
-
-      
-        <div class="content-wrapper">
-
-            <!-- Content Wrapper. Contains page content -->
-            <!-- Content Header (Page header) -->
-            <div class="content-header">
-                <div class="container-fluid">
-                    <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h1 class="m-0 text-dark">{% block page_title %}{% endblock page_title %}</h1>
-                        </div><!-- /.col -->
-                        <div class="col-sm-6">
-                            
-                            <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                                <li class="breadcrumb-item active">{{ page_title }}</li>
-                            </ol>
-                        </div><!-- /.col -->
-                    </div><!-- /.row -->
-                </div><!-- /.container-fluid -->
-            </div>
-            <!-- /.content-header -->
-
-            <!-- Main content -->
-            
-            <section class="content">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                {% if messages %}
-                                {% for message in messages %}
-                                    <div class="alert alert-dismissible fade show 
-                                        {% if message.tags == 'success' %} alert-success 
-                                        {% elif message.tags == 'error' %} alert-danger 
-                                        {% elif message.tags == 'warning' %} alert-warning 
-                                        {% elif message.tags == 'info' %} alert-info 
-                                        {% else %} alert-secondary {% endif %}" 
-                                        role="alert">
-                                        {{ message }}
-                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                {% endfor %}
-                                {% endif %}
-                            </div>
+        <div class="camp-shell">
+            <nav class="camp-header navbar navbar-expand">
+                <div class="camp-topbar">
+                    <div class="camp-topbar-left">
+                        <a class="camp-icon-btn" href="#" id="camp-sidebar-toggle" role="button" aria-label="Toggle sidebar">
+                            <i class="fas fa-bars"></i>
+                        </a>
+                        <div>
+                            <strong>{{ page_title|default:"Dashboard" }}</strong>
                         </div>
                     </div>
+                    <div class="camp-topbar-right">
+                        {% if request.user.is_authenticated %}
+                        <a href="{% url 'user_logout' %}" onclick="return confirm('Your session would be terminated.\n\nProceed?')" class="camp-logout">
+                            <i class="fas fa-power-off"></i>
+                            <span>Logout</span>
+                        </a>
+                        {% endif %}
+                    </div>
                 </div>
-            </section>
-            
-            {% block content %}
-            {% endblock content %}
-            
-            <!-- Include footer -->
-            {% include "main_app/footer.html" %}
-            
-            <!-- Auto-close alerts after 5 seconds -->
-            <script>
-                setTimeout(function() {
-                    $(".alert").alert('close');
-                }, 5000); // 5 seconds
-            </script>
-            
-    <!-- ./wrapper -->
-    <!-- jQuery -->
-    <script src="{% static 'plugins/jquery/jquery.min.js'%} "></script>
-    <!-- jQuery UI 1.11.4 -->
-    <script src="{% static 'plugins/jquery-ui/jquery-ui.min.js'%} "></script>
-    <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+            </nav>
+
+            <div class="camp-content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid px-0">
+                    </div>
+                </div>
+
+                <section class="content">
+                    <div class="container-fluid px-0">
+                        {% if messages %}
+                        <div class="row">
+                            <div class="col-12">
+                                {% for message in messages %}
+                                <div class="alert alert-dismissible fade show {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% elif message.tags == 'warning' %}alert-warning{% elif message.tags == 'info' %}alert-info{% else %}alert-secondary{% endif %}" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% block content %}{% endblock content %}
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'plugins/jquery-ui/jquery-ui.min.js' %}"></script>
     <script>
-        $.widget.bridge('uibutton', $.ui.button)
+        $.widget.bridge('uibutton', $.ui.button);
+        setTimeout(function() {
+            $(".alert").alert('close');
+        }, 5000);
+        $(function () {
+            $("#camp-sidebar-toggle").on("click", function (event) {
+                event.preventDefault();
+                if (window.innerWidth <= 991) {
+                    $("body").toggleClass("camp-sidebar-open");
+                } else {
+                    $("body").toggleClass("camp-sidebar-collapsed");
+                }
+            });
+
+            $(document).on("click", function (event) {
+                if (window.innerWidth > 991) {
+                    return;
+                }
+                if ($(event.target).closest(".camp-sidebar, #camp-sidebar-toggle").length) {
+                    return;
+                }
+                $("body").removeClass("camp-sidebar-open");
+            });
+        });
     </script>
-    <!-- Bootstrap 4 -->
-    <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js'%} "></script>
-    <!-- ChartJS -->
-    <script src="{% static 'plugins/chart.js/Chart.min.js'%} "></script>
-    <!-- Sparkline -->
-    <script src="{% static 'plugins/sparklines/sparkline.js'%} "></script>
- 
-    <!-- jQuery Knob Chart -->
-    <script src="{% static 'plugins/jquery-knob/jquery.knob.min.js'%} "></script>
-    <!-- daterangepicker -->
-    <script src="{% static 'plugins/moment/moment.min.js'%} "></script>
-    <script src="{% static 'plugins/daterangepicker/daterangepicker.js'%} "></script>
-    <!-- Tempusdominus Bootstrap 4 -->
-    <script src="{% static 'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js'%} "></script>
-
-    <!-- overlayScrollbars -->
-    <script src="{% static 'plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js'%} "></script>
-    <!-- AdminLTE App -->
-    <script src="{% static 'dist/js/adminlte.js'%} "></script>
-    <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
-    <script src="{% static 'dist/js/pages/dashboard.js'%} "></script>
-    <!-- AdminLTE for demo purposes -->
-    <script src="{% static 'dist/js/demo.js'%} "></script>
-    {% block custom_js %}
-
-    {% endblock custom_js %}
+    <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'plugins/chart.js/Chart.min.js' %}"></script>
+    <script src="{% static 'plugins/sparklines/sparkline.js' %}"></script>
+    <script src="{% static 'plugins/jquery-knob/jquery.knob.min.js' %}"></script>
+    <script src="{% static 'plugins/moment/moment.min.js' %}"></script>
+    <script src="{% static 'plugins/daterangepicker/daterangepicker.js' %}"></script>
+    <script src="{% static 'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+    <script src="{% static 'plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
+    <script src="{% static 'dist/js/adminlte.js' %}"></script>
+    {% block custom_js %}{% endblock custom_js %}
 </body>
-
 </html>

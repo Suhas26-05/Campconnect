@@ -1,0 +1,15 @@
+{% extends 'main_app/base.html' %}
+{% block page_title %}{{ page_title }}{% endblock page_title %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Update Parent Profile</h3>
+            </div>
+            {% include "main_app/form_template.html" with form=form button_text="Update Parent" %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,147 +1,314 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="shortcut icon" type="image/x-icon" href="{% static 'dist/img/logo.png' %} ">
-    <title>CampConnect | Log In</title>
-    <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Font Awesome -->
+    <title>CampConnect | Sign In</title>
     <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
-    <!-- Ionicons -->
-    <link rel="stylesheet" href="{% static 'https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css' %}">
-    <!-- icheck bootstrap -->
-    <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
-    <!-- Theme style -->
     <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
-    <!-- Google Font: Source Sans Pro -->
-    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        /* Background styling for the login page */
-        body.login-page {
-            background: url("{% static 'dist/img/bg.jpg' %} ") no-repeat center center fixed;
-            background-size: cover;
+        :root {
+            --ink: #17211b;
+            --muted: #66766a;
+            --line: rgba(23, 33, 27, 0.12);
+            --panel: rgba(255,255,255,0.88);
+            --primary: #1f6f57;
+            --accent: #edae49;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Plus Jakarta Sans", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 10% 10%, rgba(237, 174, 73, 0.24), transparent 26%),
+                radial-gradient(circle at 92% 18%, rgba(31, 111, 87, 0.22), transparent 22%),
+                linear-gradient(135deg, #eff6ed 0%, #f9fbf6 40%, #f0f7f2 100%);
+        }
+
+        .login-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+        }
+
+        .login-showcase {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background:
+                linear-gradient(160deg, rgba(19, 66, 51, 0.92), rgba(31, 111, 87, 0.88)),
+                url("{% static 'dist/img/bg.jpg' %}") center/cover no-repeat;
+            color: #fff;
+        }
+
+        .showcase-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            align-self: flex-start;
+            padding: 0.65rem 1rem;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.14);
+            backdrop-filter: blur(12px);
+            font-weight: 700;
+        }
+
+        .showcase-copy h1 {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: clamp(2.5rem, 2rem + 2vw, 4rem);
+            line-height: 1.05;
+            margin-bottom: 1rem;
+        }
+
+        .showcase-copy p {
+            max-width: 34rem;
+            color: rgba(255,255,255,0.82);
+            font-size: 1.05rem;
+        }
+
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .role-card {
+            border-radius: 24px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.12);
+            padding: 1rem 1.1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .role-card strong {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-size: 1rem;
+        }
+
+        .login-panel {
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            margin: 0;
+            padding: 2rem;
         }
 
-        .login-box {
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-            margin-right: 50px;
+        .login-card {
+            width: 100%;
+            max-width: 480px;
+            border-radius: 32px;
+            background: var(--panel);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 30px 80px rgba(17, 29, 23, 0.14);
+            border: 1px solid rgba(255,255,255,0.65);
+            padding: 2rem;
+        }
+
+        .login-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .login-brand img {
+            width: 58px;
+            height: 58px;
+            border-radius: 18px;
+            background: #f2f6ef;
+            padding: 8px;
+        }
+
+        .login-brand strong {
+            display: block;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 1.35rem;
+        }
+
+        .login-brand span {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .login-card h2 {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 2rem;
+            margin-bottom: 0.55rem;
+        }
+
+        .login-card p {
+            color: var(--muted);
+        }
+
+        .form-control {
+            min-height: 52px;
+            border-radius: 16px;
+            border: 1px solid var(--line);
+            padding-left: 1rem;
+        }
+
+        .input-group-text {
+            border-radius: 16px;
+            border: 1px solid var(--line);
+            background: #f8fbf7;
+            color: var(--primary);
+        }
+
+        .captcha-box {
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(31, 111, 87, 0.1), rgba(237, 174, 73, 0.12));
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .captcha-question {
+            font-weight: 800;
+            font-size: 1.05rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .btn-login {
+            border: 0;
+            border-radius: 16px;
+            min-height: 52px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), #329b76);
+        }
+
+        .alert {
+            border-radius: 16px;
+            border: 0;
+        }
+
+        @media (max-width: 991.98px) {
+            .login-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .login-showcase {
+                padding: 2rem 1.5rem;
+            }
+
+            .role-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
+<body>
+    <div class="login-shell">
+        <section class="login-showcase">
+            <div class="showcase-badge">
+                <i class="fas fa-circle-nodes"></i>
+                Connected Campus Platform
+            </div>
+            <div class="showcase-copy">
+                <h1>One workspace for HODs, staff, students, and parents.</h1>
+                <p>Track attendance, publish results, manage profiles, and keep every stakeholder connected from a single role-based system.</p>
+                <div class="role-grid">
+                    <div class="role-card">
+                        <strong>HOD</strong>
+                        <span>Create users, manage academics, monitor attendance, and control records.</span>
+                    </div>
+                    <div class="role-card">
+                        <strong>Staff</strong>
+                        <span>Take attendance, update results, notify students, and manage classroom activity.</span>
+                    </div>
+                    <div class="role-card">
+                        <strong>Student</strong>
+                        <span>View attendance, results, notifications, and update personal information.</span>
+                    </div>
+                    <div class="role-card">
+                        <strong>Parent</strong>
+                        <span>Track linked student progress through roll number based student connections.</span>
+                    </div>
+                </div>
+            </div>
+            <div></div>
+        </section>
 
-<body class="hold-transition login-page">
-    <div class="login-box">
-        <div class="login-logo">
-            <a href="#"><b>CampConnect</b></a>
-        </div>
-        <!-- /.login-logo -->
-        <div class="card">
-            <div class="card-body login-card-body">
+        <section class="login-panel">
+            <div class="login-card">
+                <div class="login-brand">
+                    <img src="{% static 'dist/img/Logo.png' %}" alt="CampConnect">
+                    <div>
+                        <strong>CampConnect</strong>
+                        <span>Secure access portal</span>
+                    </div>
+                </div>
+
+                <h2>Sign in</h2>
+                <p>Use your registered email and password to continue.</p>
+
                 {% if messages %}
-                <div class="col-12">
+                <div class="mb-3">
                     {% for message in messages %}
                     {% if message.tags == 'error' %}
-                    <div class="alert alert-danger text-center">
-                        {{ message }}
-                    </div>
+                    <div class="alert alert-danger">{{ message }}</div>
                     {% endif %}
                     {% endfor %}
                 </div>
                 {% endif %}
+
                 <form action="doLogin/" method="post">
                     {% csrf_token %}
                     <div class="input-group mb-3">
-                        <input required type="email" name="email" class="form-control" placeholder="Email">
+                        <input required type="email" name="email" class="form-control" placeholder="Email address">
                         <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-envelope"></span>
-                            </div>
+                            <div class="input-group-text"><span class="fas fa-envelope"></span></div>
                         </div>
                     </div>
                     <div class="input-group mb-3">
                         <input required type="password" name="password" class="form-control" placeholder="Password">
                         <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-lock"></span>
-                            </div>
+                            <div class="input-group-text"><span class="fas fa-lock"></span></div>
                         </div>
                     </div>
-                    
-                    <!-- Custom Math CAPTCHA -->
-                    <!-- CAPTCHA Question -->
-                    <label id="captcha-question" class="form-control text-center font-weight-bold"></label>
 
-                    <!-- Hidden Inputs for Server-Side Validation -->
-                    <input type="hidden" name="num1" id="num1">
-                    <input type="hidden" name="num2" id="num2">
-
-                    <!-- CAPTCHA Answer Input -->
-                    <input type="number" name="captcha-answer" id="captcha-answer" class="form-control" placeholder="Answer" required>
-
-
-                    <div class="row">
-                        <div class="col-8">
-                            <div class="icheck-primary">
-                                <input type="checkbox" id="remember">
-                                <label for="remember">Remember Me</label>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <button type="submit" class="btn btn-success btn-block">Log In</button>
-                        </div>
+                    <div class="captcha-box">
+                        <div id="captcha-question" class="captcha-question"></div>
+                        <input type="hidden" name="num1" id="num1">
+                        <input type="hidden" name="num2" id="num2">
+                        <input type="number" name="captcha-answer" id="captcha-answer" class="form-control" placeholder="Enter the answer" required>
                     </div>
+
+                    <button type="submit" class="btn btn-success btn-login btn-block">Enter Workspace</button>
                 </form>
-
             </div>
-        </div>
+        </section>
     </div>
 
-    <!-- jQuery -->
     <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
-    <!-- Bootstrap 4 -->
     <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-    <!-- AdminLTE App -->
-    <script src="{% static 'dist/js/adminlte.min.js' %}"></script>
-
     <script>
         function generateCaptcha() {
-            let num1 = Math.floor(Math.random() * 10) + 1;
-            let num2 = Math.floor(Math.random() * 10) + 1;
-        
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
             document.getElementById("num1").value = num1;
             document.getElementById("num2").value = num2;
-            document.getElementById("captcha-question").innerText = `Solve: ${num1} + ${num2}`;
+            document.getElementById("captcha-question").innerText = `Security check: ${num1} + ${num2}`;
         }
-        
-        // Generate a new CAPTCHA when the page loads
+
         generateCaptcha();
-        
-        // Refresh CAPTCHA if user enters the wrong answer
+
         document.querySelector("form").addEventListener("submit", function (event) {
-            let userAnswer = parseInt(document.getElementById("captcha-answer").value, 10);
-            let correctAnswer = parseInt(document.getElementById("num1").value) + parseInt(document.getElementById("num2").value);
-        
+            const userAnswer = parseInt(document.getElementById("captcha-answer").value, 10);
+            const correctAnswer = parseInt(document.getElementById("num1").value, 10) + parseInt(document.getElementById("num2").value, 10);
             if (userAnswer !== correctAnswer) {
-                alert("Incorrect CAPTCHA. Generating a new one...");
-                event.preventDefault(); // Prevent form submission
-                generateCaptcha(); // Generate a new CAPTCHA
+                alert("Incorrect CAPTCHA. Please try again.");
+                event.preventDefault();
+                generateCaptcha();
             }
         });
     </script>
-
 </body>
-
 </html>

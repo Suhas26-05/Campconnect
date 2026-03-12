@@ -1,111 +1,378 @@
 {% extends 'main_app/base.html' %}
 {% load static %}
-{% block page_title %}{{page_title}}{% endblock page_title %}
+{% block page_title %}{{ page_title }}{% endblock page_title %}
+
+{% block custom_css %}
+<style>
+    .result-mode-card,
+    .result-panel,
+    .result-workspace-card {
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: var(--camp-shadow);
+        overflow: hidden;
+    }
+
+    .result-mode-card {
+        margin-bottom: 1.5rem;
+    }
+
+    .result-mode-card .card-body,
+    .result-panel .card-body,
+    .result-workspace-card .card-body {
+        padding: 1.4rem;
+    }
+
+    .result-shell {
+        display: grid;
+        grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    .result-mode-bar {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .result-mode-btn {
+        border: 0;
+        border-radius: 14px;
+        padding: 0.8rem 1rem;
+        font-weight: 700;
+        background: rgba(22, 33, 20, 0.08);
+        color: var(--camp-ink);
+    }
+
+    .result-mode-btn.is-active {
+        background: linear-gradient(135deg, var(--camp-primary), #36916e);
+        color: #fff;
+    }
+
+    .result-meta {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .result-note {
+        padding: 0.95rem 1rem;
+        border-radius: 18px;
+        background: rgba(31, 111, 87, 0.08);
+        color: var(--camp-primary-deep);
+        font-size: 0.92rem;
+        line-height: 1.5;
+    }
+
+    .result-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .result-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.55rem 0.8rem;
+        border-radius: 999px;
+        background: rgba(22, 33, 20, 0.06);
+        color: var(--camp-primary-deep);
+        font-weight: 700;
+        font-size: 0.84rem;
+    }
+
+    .result-empty {
+        padding: 2.75rem 1.25rem;
+        text-align: center;
+        color: var(--camp-muted);
+        border: 1px dashed rgba(22, 33, 20, 0.16);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.55);
+    }
+
+    .result-counter {
+        margin-left: auto;
+    }
+
+    .result-actions {
+        display: flex;
+        gap: 0.9rem;
+        flex-wrap: wrap;
+        margin-top: 1.25rem;
+    }
+
+    .result-actions .btn {
+        min-width: 180px;
+    }
+
+    .result-student-list {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    @media (max-width: 991.98px) {
+        .result-shell {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock custom_css %}
+
 {% block content %}
+<div class="result-mode-card card">
+    <div class="card-body">
+        <div class="result-mode-bar">
+            <button type="button" class="result-mode-btn" data-mode="add">Add Results</button>
+            <button type="button" class="result-mode-btn" data-mode="edit">Edit Results</button>
+        </div>
+    </div>
+</div>
 
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <!-- general form elements -->
-                    <form method="POST">
-                        {% csrf_token %}
-                <div class="card card-info">
-                    <div class="card-header">
-                        <h3 class="card-title">{{page_title}}</h3>
-                    </div>
-
-       
-                    <!-- /.card-header -->
-                    <!-- form start -->
-                    <div class="card-body">
-
-
-                        <div class="form-group">
-                            <label>Subject</label>
-                            <select name="subject" class="form-control" id='subject'>
-                                <option value="">----</option>
-                                {% for subject in subjects  %}
-                                <option value="{{subject.id}}">{{subject.name}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-
-                        <div class="form-group">
-                            <label>Session Year</label>
-                            <select name="session" id='session' class="form-control">
-                                <option value="">----</option>
-                                {% for session in sessions  %}
-                                <option value="{{session.id}}">{{session}} </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-
-                    </div>
-                    <!-- /.card-body -->
-
-                    <div class="card-footer">
-                        <button type="button" id='fetch_student' class="btn btn-primary btn-block">Fetch
-                            Students</button>
-                        <div class="form-group" id="student_data">
-
-                        </div>
-                    </div>
-                </form>
+<div class="result-shell">
+    <div class="result-panel card">
+        <div class="card-header camp-card-header">
+            <div class="camp-card-header-copy">
+                <h3 class="card-title">{{ page_title }}</h3>
+                <p>Handle unit and mid-term results from one workspace.</p>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="result-meta">
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <select name="subject" class="form-control" id="subject">
+                        <option value="">Select subject</option>
+                        {% for subject in subjects %}
+                        <option value="{{ subject.id }}">{{ subject.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-                <!-- /.card -->
 
+                <div class="form-group">
+                    <label for="session">Class Section</label>
+                    <select name="session" id="session" class="form-control">
+                        <option value="">Select section</option>
+                        {% for session in sessions %}
+                        <option value="{{ session.id }}">{{ session }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="result_type">Assessment Type</label>
+                    <select name="result_type" id="result_type" class="form-control">
+                        <option value="">Select assessment type</option>
+                        <option value="unit">Unit Test</option>
+                        <option value="mid">Mid Term</option>
+                    </select>
+                </div>
+
+                <div class="result-note" id="result_note">
+                    Choose the subject, section, and assessment type, then load students to add a new result entry.
+                </div>
+
+                <button type="button" id="result_primary_btn" class="btn btn-success btn-block">
+                    Load Students
+                </button>
             </div>
         </div>
     </div>
-</section>
-{% endblock content %}
 
+    <div class="result-workspace-card card">
+        <div class="card-header camp-card-header">
+            <div class="camp-card-header-copy">
+                <h3 class="card-title">Result Workspace</h3>
+                <p id="result_workspace_copy">Students for the selected subject and section will appear here.</p>
+            </div>
+            <div class="result-counter camp-badge" id="result_counter">0 students</div>
+        </div>
+        <div class="card-body">
+            <div class="result-summary" id="result_summary" style="display:none;">
+                <span class="result-chip" id="selected_subject_chip">
+                    <i class="fas fa-book-open"></i>
+                    <span>Subject</span>
+                </span>
+                <span class="result-chip" id="selected_session_chip">
+                    <i class="fas fa-users"></i>
+                    <span>Section</span>
+                </span>
+                <span class="result-chip" id="selected_type_chip">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Assessment</span>
+                </span>
+            </div>
+
+            <div id="result_data">
+                <div class="result-empty">
+                    Choose a mode, subject, section, and assessment type to begin.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
 
 {% block custom_js %}
 <script>
     $(document).ready(function () {
+        var currentMode = "{{ result_mode|default:'add' }}";
 
-       
-        $("#fetch_student").click(function () {
-            var subject = $("#subject").val()
-            var session = $("#session").val()
-            $("#student_data").html(null)
-if (subject.length  == 0 || session.length == 0){
-    alert("Please select session and subject");
-    return false;
-}
+        function renderEmptyState(message) {
+            $("#result_summary").hide();
+            $("#result_counter").text("0 students");
+            $("#result_data").html("<div class='result-empty'>" + message + "</div>");
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            $(".result-mode-btn").removeClass("is-active");
+            $('.result-mode-btn[data-mode="' + mode + '"]').addClass("is-active");
+            $("#result_primary_btn").text(mode === "add" ? "Load Students" : "Load Students for Edit");
+            $("#result_note").text(
+                mode === "add"
+                    ? "Choose the subject, section, and assessment type, then load students to add a new result entry."
+                    : "Choose the subject, section, and assessment type, then load students and fetch an existing result to edit."
+            );
+            $("#result_workspace_copy").text(
+                mode === "add"
+                    ? "Students for the selected subject and section will appear here."
+                    : "Existing results can be fetched and updated here."
+            );
+            renderEmptyState(
+                mode === "add"
+                    ? "Choose a mode, subject, section, and assessment type to begin."
+                    : "Choose a mode, subject, section, and assessment type, then load students for editing."
+            );
+        }
+
+        function setSummary(subjectText, sessionText, typeText) {
+            $("#result_summary").show();
+            $("#selected_subject_chip span:last").text(subjectText);
+            $("#selected_session_chip span:last").text(sessionText);
+            $("#selected_type_chip span:last").text(typeText);
+        }
+
+        function renderForm(students) {
+            if (!students.length) {
+                renderEmptyState("No active students are available for this subject and section.");
+                return;
+            }
+
+            var subjectText = $("#subject option:selected").text();
+            var sessionText = $("#session option:selected").text();
+            var typeText = $("#result_type option:selected").text();
+            setSummary(subjectText, sessionText, typeText);
+            $("#result_counter").text(students.length + " students");
+
+            var html = "";
+            html += "<form method='POST' id='result_form'>";
+            html += "{% csrf_token %}";
+            html += "<input type='hidden' name='result_mode' value='" + currentMode + "'>";
+            html += "<input type='hidden' name='subject' value='" + $("#subject").val() + "'>";
+            html += "<input type='hidden' name='result_type' value='" + $("#result_type").val() + "'>";
+            html += "<div class='form-group'><label for='student_selector'>Student</label>";
+            html += "<select class='form-control' id='student_selector' name='student'>";
+            for (var i = 0; i < students.length; i++) {
+                html += "<option value='" + students[i].id + "'>" + students[i].name + "</option>";
+            }
+            html += "</select></div>";
+            html += "<div class='form-group'><label for='assessment_name'>Assessment Name</label>";
+            html += "<input class='form-control' id='assessment_name' name='assessment_name' placeholder='" + ($("#result_type").val() === "unit" ? "Unit 1" : "Mid 1") + "' required type='text'></div>";
+            html += "<div class='form-group row'>";
+            html += "<div class='col-md-6'><label for='test_score'>Internal Score</label><input class='form-control' id='test_score' name='test' placeholder='Internal Score' max='40' min='0' required type='number' step='0.01'></div>";
+            html += "<div class='col-md-6'><label for='exam_score'>External Score</label><input class='form-control' id='exam_score' name='exam' placeholder='External Score' max='60' min='0' required type='number' step='0.01'></div>";
+            html += "</div>";
+            if (currentMode === "edit") {
+                html += "<div class='result-actions'>";
+                html += "<button type='button' id='fetch_existing_result' class='btn btn-secondary'>Fetch Existing Result</button>";
+                html += "<button type='submit' class='btn btn-success'>Update Result</button>";
+                html += "</div>";
+            } else {
+                html += "<div class='result-actions'><button type='submit' class='btn btn-success'>Save Result</button></div>";
+            }
+            html += "</form>";
+            $("#result_data").html(html);
+        }
+
+        function loadStudents() {
             $.ajax({
                 url: "{% url 'get_students' %}",
-                type: 'POST',
+                type: "POST",
                 data: {
-                    subject: subject,
-                    session: session
+                    subject: $("#subject").val(),
+                    session: $("#session").val()
                 }
             }).done(function (response) {
-                var json_data = JSON.parse(response)
-                if (json_data.length < 1) {
-                    alert("No data to display")
-                } else {
-                    var div_data = "<hr/><div class='form-group'> <label> Student List</label> <select class='student_list form-control' name='student_list'> "
+                var data = (typeof response === "string") ? JSON.parse(response) : response;
+                renderForm(data);
+            }).fail(function () {
+                renderEmptyState("There was an error while fetching students. Please try again.");
+            }).always(function () {
+                $("#result_primary_btn").prop("disabled", false).text(
+                    currentMode === "add" ? "Load Students" : "Load Students for Edit"
+                );
+            });
+        }
 
-                    for (key in json_data) {
-                        div_data += "<option value='" + json_data[key]['id'] + "'>" + json_data[key]['name'] + " </option>"
-                    }
-                    div_data += "</select></div>"
-                    div_data += "<div class='form-group row'> <div class='col-md-6'> <label> Test Score </label> <input class='form-control' name='test' placeholder='Test Score' max='40' min='0' required type='number' /></div><div class='col-md-6'><label> Exam Score </label>  <input class='form-control' placeholder='Exam Score'  name='exam' max='60' min='0' required type='number' /> </div></div><div class='form-group'><button id='save_attendance' class='btn btn-success' type='submit'>Save Result</button></div></div>"
-                    $("#student_data").html(div_data)
+        $(".result-mode-btn").on("click", function () {
+            setMode($(this).data("mode"));
+        });
+
+        $("#result_primary_btn").on("click", function () {
+            var subject = $("#subject").val();
+            var session = $("#session").val();
+            var resultType = $("#result_type").val();
+
+            if (!subject || !session || !resultType) {
+                alert("Please select subject, section, and assessment type.");
+                return;
+            }
+
+            $(this).prop("disabled", true).text(
+                currentMode === "add" ? "Loading Students..." : "Loading Students for Edit..."
+            );
+            loadStudents();
+        });
+
+        $(document).on("click", "#fetch_existing_result", function () {
+            var student = $("#student_selector").val();
+            var subject = $("#subject").val();
+            var resultType = $("#result_type").val();
+            var assessmentName = $("#assessment_name").val();
+
+            if (!student || !subject || !resultType || !assessmentName) {
+                alert("Please choose student and fill assessment name first.");
+                return;
+            }
+
+            $(this).prop("disabled", true).text("Fetching...");
+            $.ajax({
+                url: "{% url 'fetch_student_result' %}",
+                type: "POST",
+                data: {
+                    student: student,
+                    subject: subject,
+                    result_type: resultType,
+                    assessment_name: assessmentName
                 }
-            }).fail(function (response) {
-                alert("Error in fetching students")
-            })
+            }).done(function (response) {
+                if (response === "False") {
+                    alert("No matching result found.");
+                    return;
+                }
+                var data = (typeof response === "string") ? JSON.parse(response) : response;
+                $("#test_score").val(data.test);
+                $("#exam_score").val(data.exam);
+            }).fail(function () {
+                alert("Error in fetching result.");
+            }).always(function () {
+                $("#fetch_existing_result").prop("disabled", false).text("Fetch Existing Result");
+            });
+        });
 
-
-
-
-        })
-    })
+        setMode(currentMode === "edit" ? "edit" : "add");
+    });
 </script>
 {% endblock custom_js %}

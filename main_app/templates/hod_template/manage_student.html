@@ -1,60 +1,82 @@
 {% extends 'main_app/base.html' %}
 {% load static %}
-{% block page_title %}{{page_title}}{% endblock page_title %}
+{% block page_title %}{{ page_title }}{% endblock page_title %}
 
 {% block content %}
-
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card-info">
-                    <div class="card-header">
-                        <h3 class="card-title">{{page_title}}</h3>
-                    </div>
-                    <!-- /.card-header -->
-                    <div class="card-body">
-                        <table id="example2" class="table table-bordered table-hover">
-                            <thead class="table-info">
-                                <tr>
-                                    <th>#</th>
-                                    <th>Full Name</th>
-                                    <th>Email</th>
-                                    <th>Gender</th>
-                                    <th>Course</th>
-                                    <th>Avatar</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for student in students %}
-                                <tr>
-                                    <td>{{ forloop.counter }}</td>
-                                    <td>{{student.last_name}}, {{student.first_name}}</td>
-                                    <td>{{student.email}}</td>
-                                    <td>{{student.gender}}</td>
-                                    <td>{{student.student.course.name}}</td>
-                                    <td>
-                                        {% if student.profile_pic == ""  %}
-                                        No Image
-                                        {% else %}
-                                        <img class="img img-fluid mb-2" height="56" width="56"
-                                            src="{{student.profile_pic}}" alt="">
-                                        {% endif %}
-                                    </td>
-                                    
-                                    <td><a href="{% url 'edit_student' student.student.id %}" class="btn btn-info">Edit</a> -
-                                        <a href="{% url 'delete_student' student.student.id %}" class="btn btn-danger" onclick="return confirm('Are you sure about this ?')">Delete</a>
-
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+<div class="card camp-table-card">
+    <div class="card-header camp-card-header">
+        <div class="camp-card-header-copy">
+            <h3 class="card-title">{{ page_title }}</h3>
+        </div>
+        <div class="table-actions camp-header-actions-equal">
+            <a href="{% url 'add_student' %}" class="camp-header-action camp-header-action-equal">
+                <i class="fas fa-plus"></i>
+                <span>Add Student</span>
+            </a>
+            <form method="POST" action="{% url 'delete_all_students' %}" onsubmit="return confirm('Delete all student records? This cannot be undone.');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger camp-header-action-equal">Delete All</button>
+            </form>
         </div>
     </div>
-</section>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Roll No</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Gender</th>
+                        <th>Course</th>
+                        <th>Status</th>
+                        <th>Avatar</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ student.student.roll_number|default:"-" }}</td>
+                        <td>{{ student.last_name }}, {{ student.first_name }}</td>
+                        <td>{{ student.email }}</td>
+                        <td>{{ student.gender }}</td>
+                        <td>{{ student.student.course.name|default:"-" }}</td>
+                        <td>
+                            {% if student.student.is_suspended %}
+                            <span class="badge badge-danger">Suspended</span>
+                            {% else %}
+                            <span class="badge badge-success">Active</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if student.profile_pic %}
+                            <img class="img img-fluid" height="56" width="56" src="{{ student.profile_pic.url }}" alt="">
+                            {% else %}
+                            No Image
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <a href="{% url 'student_detail' student.student.id %}" class="btn btn-secondary">Details</a>
+                                <a href="{% url 'edit_student' student.student.id %}" class="btn btn-info">Edit</a>
+                                <a href="{% url 'toggle_student_suspension' student.student.id %}" class="btn btn-warning" onclick="return confirm('Change student suspension status?')">
+                                    {% if student.student.is_suspended %}Activate{% else %}Suspend{% endif %}
+                                </a>
+                                <a href="{% url 'delete_student' student.student.id %}" class="btn btn-danger" onclick="return confirm('Are you sure about this?')">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9">No student records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock content %}

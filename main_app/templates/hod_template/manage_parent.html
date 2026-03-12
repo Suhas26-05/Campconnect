@@ -1,0 +1,76 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{ page_title }}{% endblock page_title %}
+
+{% block content %}
+<div class="card camp-table-card">
+    <div class="card-header camp-card-header">
+        <div class="camp-card-header-copy">
+            <h3 class="card-title">{{ page_title }}</h3>
+        </div>
+        <div class="table-actions camp-header-actions-equal">
+            <a href="{% url 'add_parent' %}" class="camp-header-action camp-header-action-equal">
+                <i class="fas fa-plus"></i>
+                <span>Add Parent</span>
+            </a>
+            <form method="POST" action="{% url 'delete_all_parents' %}" onsubmit="return confirm('Delete all parent records? This cannot be undone.');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger camp-header-action-equal">Delete All</button>
+            </form>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Gender</th>
+                        <th>Linked Student</th>
+                        <th>Roll Number</th>
+                        <th>Avatar</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for parent in parents %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ parent.last_name }}, {{ parent.first_name }}</td>
+                        <td>{{ parent.email }}</td>
+                        <td>{{ parent.gender }}</td>
+                        <td>
+                            {% if parent.parent.student %}
+                            {{ parent.parent.student.admin.first_name }} {{ parent.parent.student.admin.last_name }}
+                            {% else %}
+                            Not linked
+                            {% endif %}
+                        </td>
+                        <td>{{ parent.parent.student.roll_number|default:"-" }}</td>
+                        <td>
+                            {% if parent.profile_pic %}
+                            <img class="img img-fluid" height="56" width="56" src="{{ parent.profile_pic.url }}" alt="">
+                            {% else %}
+                            No Image
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <a href="{% url 'edit_parent' parent.parent.id %}" class="btn btn-info">Edit</a>
+                                <a href="{% url 'delete_parent' parent.parent.id %}" class="btn btn-danger" onclick="return confirm('Are you sure about this?')">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8">No parent records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock content %}
