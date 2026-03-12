@@ -260,18 +260,3 @@ Run tests with:
 python manage.py test
 ```
 
-## Limitations
-
-Current limitations in the codebase:
-
-- many AJAX endpoints still use `csrf_exempt`
-- deployment settings still need hardening
-- test coverage is still minimal
-- static assets still contain duplicate vendor files
-- internal naming still uses `Session` in code while the UI shows `Section`
-
-## Documentation
-
-For a deeper project-level review, see:
-
-- [`PROJECT_DEEP_ANALYSIS.txt`](./PROJECT_DEEP_ANALYSIS.txt)
